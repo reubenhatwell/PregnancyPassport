@@ -29,6 +29,8 @@ import createMemoryStore from "memorystore";
 
 const MemoryStore = createMemoryStore(session);
 
+type SessionStore = session.Store;
+
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -76,8 +78,18 @@ export interface IStorage {
   getAllEducationModules(): Promise<EducationModule[]>;
   createEducationModule(module: InsertEducationModule): Promise<EducationModule>;
   
+  // Initialize methods for demo data
+  initializeUsers(): void;
+  initializePregnancies(): void;
+  initializeAppointments(): void;
+  initializeVitalStats(): void;
+  initializeTestResults(): void;
+  initializeScans(): void;
+  initializeMessages(): void;
+  initializeEducationModules(): void;
+  
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: SessionStore;
 }
 
 export class MemStorage implements IStorage {
@@ -90,7 +102,7 @@ export class MemStorage implements IStorage {
   private messages: Map<number, Message>;
   private educationModules: Map<number, EducationModule>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: SessionStore;
   
   private userIdCounter: number;
   private pregnancyIdCounter: number;
@@ -124,7 +136,14 @@ export class MemStorage implements IStorage {
       checkPeriod: 86400000, // prune expired entries every 24h
     });
     
-    // Initialize with sample education modules
+    // Initialize with sample data
+    this.initializeUsers();
+    this.initializePregnancies();
+    this.initializeAppointments();
+    this.initializeVitalStats();
+    this.initializeTestResults();
+    this.initializeScans();
+    this.initializeMessages();
     this.initializeEducationModules();
   }
 
@@ -321,6 +340,499 @@ export class MemStorage implements IStorage {
   }
   
   // Initialize education modules with some data
+  private initializeUsers() {
+    // Create a patient user
+    const patient = {
+      id: this.userIdCounter++,
+      username: "sarah.patient",
+      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      email: "sarah@example.com",
+      firstName: "Sarah",
+      lastName: "Johnson",
+      role: "patient"
+    };
+    this.users.set(patient.id, patient);
+    
+    // Create a clinician user
+    const clinician = {
+      id: this.userIdCounter++,
+      username: "dr.smith",
+      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      email: "dr.smith@hospital.com",
+      firstName: "Jane",
+      lastName: "Smith",
+      role: "clinician"
+    };
+    this.users.set(clinician.id, clinician);
+    
+    // Create another patient user
+    const patient2 = {
+      id: this.userIdCounter++,
+      username: "emily.williams",
+      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      email: "emily@example.com",
+      firstName: "Emily",
+      lastName: "Williams",
+      role: "patient"
+    };
+    this.users.set(patient2.id, patient2);
+  }
+  
+  private initializePregnancies() {
+    // Pregnancy for Sarah Johnson (patient id 1)
+    const pregnancy1 = {
+      id: this.pregnancyIdCounter++,
+      patientId: 1, // Sarah Johnson
+      dueDate: "2025-08-15", // About 28 weeks along from today
+      startDate: "2024-11-08", // Conception date
+      notes: "First pregnancy, low risk, normal progression"
+    };
+    this.pregnancies.set(pregnancy1.id, pregnancy1);
+    
+    // Pregnancy for Emily Williams (patient id 3)
+    const pregnancy2 = {
+      id: this.pregnancyIdCounter++,
+      patientId: 3, // Emily Williams
+      dueDate: "2025-10-23", // About 16 weeks along from today
+      startDate: "2025-01-16", // Conception date
+      notes: "Second pregnancy, previous C-section"
+    };
+    this.pregnancies.set(pregnancy2.id, pregnancy2);
+  }
+  
+  private initializeAppointments() {
+    // Past appointments for Sarah Johnson
+    const pastAppointments = [
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "Initial Prenatal Visit",
+        description: "First pregnancy confirmation and initial assessment",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2024-12-05T10:00:00Z",
+        duration: 60,
+        notes: "Confirmed pregnancy, provided prenatal vitamins prescription",
+        completed: true
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "12-Week Ultrasound",
+        description: "First trimester screening and nuchal translucency scan",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2025-01-28T14:30:00Z",
+        duration: 45,
+        notes: "Normal development, low risk assessment",
+        completed: true
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "20-Week Anatomy Scan",
+        description: "Detailed ultrasound to check baby's development",
+        location: "Imaging Department, City Hospital",
+        clinicianName: "Dr. Michael Chen",
+        dateTime: "2025-03-15T11:15:00Z",
+        duration: 60,
+        notes: "All anatomical structures developing normally",
+        completed: true
+      }
+    ];
+    
+    // Future appointments for Sarah Johnson
+    const futureAppointments = [
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "28-Week Checkup",
+        description: "Glucose screening test and routine checkup",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2025-05-12T09:30:00Z",
+        duration: 45,
+        notes: "",
+        completed: false
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "32-Week Checkup",
+        description: "Review test results and growth assessment",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2025-06-10T13:45:00Z",
+        duration: 30,
+        notes: "",
+        completed: false
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 1,
+        title: "Childbirth Education Class",
+        description: "Session 1: Preparation for childbirth",
+        location: "Education Center, Floor 3",
+        clinicianName: "Midwife Emma Roberts",
+        dateTime: "2025-06-18T18:00:00Z",
+        duration: 120,
+        notes: "",
+        completed: false
+      }
+    ];
+    
+    // Appointments for Emily Williams
+    const appointments2 = [
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 2,
+        title: "Initial Prenatal Visit",
+        description: "Second pregnancy confirmation",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2025-02-20T11:00:00Z",
+        duration: 60,
+        notes: "Confirmed pregnancy, discussed previous C-section history",
+        completed: true
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 2,
+        title: "12-Week Ultrasound",
+        description: "First trimester screening",
+        location: "Women's Health Center",
+        clinicianName: "Dr. Jane Smith",
+        dateTime: "2025-04-15T15:30:00Z",
+        duration: 45,
+        notes: "Normal development",
+        completed: true
+      },
+      {
+        id: this.appointmentIdCounter++,
+        pregnancyId: 2,
+        title: "20-Week Anatomy Scan",
+        description: "Detailed ultrasound and VBAC consultation",
+        location: "Imaging Department, City Hospital",
+        clinicianName: "Dr. Lisa Wong",
+        dateTime: "2025-05-30T13:00:00Z",
+        duration: 75,
+        notes: "",
+        completed: false
+      }
+    ];
+    
+    [...pastAppointments, ...futureAppointments, ...appointments2].forEach(appointment => {
+      this.appointments.set(appointment.id, appointment);
+    });
+  }
+  
+  private initializeVitalStats() {
+    // Vital stats for Sarah Johnson (pregnancy id 1)
+    const vitalStats = [
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 1,
+        date: "2024-12-05",
+        weight: 62500, // in grams (62.5 kg)
+        bloodPressureSystolic: 118,
+        bloodPressureDiastolic: 75,
+        fundalHeight: null, // too early
+        notes: "Initial measurement, all normal",
+        clinicianId: 2
+      },
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 1,
+        date: "2025-01-28",
+        weight: 64100, // in grams (64.1 kg)
+        bloodPressureSystolic: 120,
+        bloodPressureDiastolic: 78,
+        fundalHeight: 12, // in cm
+        notes: "Normal weight gain of 1.6kg in first trimester",
+        clinicianId: 2
+      },
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 1,
+        date: "2025-03-15",
+        weight: 67300, // in grams (67.3 kg)
+        bloodPressureSystolic: 122,
+        bloodPressureDiastolic: 76,
+        fundalHeight: 20, // in cm
+        notes: "Fundal height matches gestational age",
+        clinicianId: 2
+      },
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 1,
+        date: "2025-04-20",
+        weight: 69800, // in grams (69.8 kg)
+        bloodPressureSystolic: 124,
+        bloodPressureDiastolic: 78,
+        fundalHeight: 24, // in cm
+        notes: "Normal progression",
+        clinicianId: 2
+      }
+    ];
+    
+    // Vital stats for Emily Williams (pregnancy id 2)
+    const vitalStats2 = [
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 2,
+        date: "2025-02-20",
+        weight: 70200, // in grams (70.2 kg)
+        bloodPressureSystolic: 125,
+        bloodPressureDiastolic: 80,
+        fundalHeight: null, // too early
+        notes: "Initial measurement, slightly elevated blood pressure, monitoring",
+        clinicianId: 2
+      },
+      {
+        id: this.vitalStatIdCounter++,
+        pregnancyId: 2,
+        date: "2025-04-15",
+        weight: 71500, // in grams (71.5 kg)
+        bloodPressureSystolic: 122,
+        bloodPressureDiastolic: 78,
+        fundalHeight: 12, // in cm
+        notes: "Blood pressure improved with lifestyle adjustments",
+        clinicianId: 2
+      }
+    ];
+    
+    [...vitalStats, ...vitalStats2].forEach(stat => {
+      this.vitalStats.set(stat.id, stat);
+    });
+  }
+  
+  private initializeTestResults() {
+    // Test results for Sarah Johnson (pregnancy id 1)
+    const testResults = [
+      {
+        id: this.testResultIdCounter++,
+        pregnancyId: 1,
+        date: "2024-12-05",
+        title: "Initial Blood Work",
+        category: "Blood Test",
+        status: "normal",
+        results: {
+          hemoglobin: "13.2 g/dL",
+          hematocrit: "39%",
+          bloodType: "O+",
+          rhFactor: "positive"
+        },
+        notes: "All levels normal, confirmed blood type",
+        clinicianId: 2
+      },
+      {
+        id: this.testResultIdCounter++,
+        pregnancyId: 1,
+        date: "2025-01-28",
+        title: "First Trimester Screening",
+        category: "Genetic Screening",
+        status: "normal",
+        results: {
+          trisomy21Risk: "1:5200",
+          trisomy18Risk: "1:10400",
+          trisomy13Risk: "1:15600"
+        },
+        notes: "Low risk for common chromosomal conditions",
+        clinicianId: 2
+      },
+      {
+        id: this.testResultIdCounter++,
+        pregnancyId: 1,
+        date: "2025-03-15",
+        title: "Complete Blood Count",
+        category: "Blood Test",
+        status: "follow_up",
+        results: {
+          hemoglobin: "11.1 g/dL",
+          hematocrit: "33%",
+          plateletCount: "250,000/µL"
+        },
+        notes: "Hemoglobin slightly low, recommend iron supplementation",
+        clinicianId: 2
+      }
+    ];
+    
+    // Test results for Emily Williams (pregnancy id 2)
+    const testResults2 = [
+      {
+        id: this.testResultIdCounter++,
+        pregnancyId: 2,
+        date: "2025-02-20",
+        title: "Initial Blood Work",
+        category: "Blood Test",
+        status: "normal",
+        results: {
+          hemoglobin: "12.8 g/dL",
+          hematocrit: "38%",
+          bloodType: "A+",
+          rhFactor: "positive"
+        },
+        notes: "All levels normal",
+        clinicianId: 2
+      },
+      {
+        id: this.testResultIdCounter++,
+        pregnancyId: 2,
+        date: "2025-03-10",
+        title: "Urine Analysis",
+        category: "Urine Test",
+        status: "abnormal",
+        results: {
+          protein: "trace",
+          glucose: "negative",
+          leukocytes: "positive"
+        },
+        notes: "Possible UTI, culture ordered",
+        clinicianId: 2
+      }
+    ];
+    
+    [...testResults, ...testResults2].forEach(result => {
+      this.testResults.set(result.id, result);
+    });
+  }
+  
+  private initializeScans() {
+    // Scans for Sarah Johnson (pregnancy id 1)
+    const scans = [
+      {
+        id: this.scanIdCounter++,
+        pregnancyId: 1,
+        date: "2025-01-28",
+        title: "12-Week Ultrasound",
+        imageUrl: "https://images.unsplash.com/photo-1577640905050-83665df24f38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600",
+        notes: "Crown-rump length 6.2cm, corresponding to 12w3d. Normal development.",
+        clinicianId: 2
+      },
+      {
+        id: this.scanIdCounter++,
+        pregnancyId: 1,
+        date: "2025-03-15",
+        title: "20-Week Anatomy Scan",
+        imageUrl: "https://images.unsplash.com/photo-1631815585553-a871c0647a88?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600",
+        notes: "All organ systems visualized and developing normally. Estimated weight 350g.",
+        clinicianId: 2
+      }
+    ];
+    
+    // Scans for Emily Williams (pregnancy id 2)
+    const scans2 = [
+      {
+        id: this.scanIdCounter++,
+        pregnancyId: 2,
+        date: "2025-04-15",
+        title: "12-Week Ultrasound",
+        imageUrl: "https://images.unsplash.com/photo-1584582867089-733d707b1a5e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600",
+        notes: "Crown-rump length 6.5cm, corresponding to 12w5d. Normal development.",
+        clinicianId: 2
+      }
+    ];
+    
+    [...scans, ...scans2].forEach(scan => {
+      this.scans.set(scan.id, scan);
+    });
+  }
+  
+  private initializeMessages() {
+    // Messages between Sarah Johnson (patient id 1) and Dr. Smith (clinician id 2)
+    const messages = [
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 1,
+        toId: 2,
+        message: "Hi Dr. Smith, I've been experiencing some mild cramping. Is this normal?",
+        timestamp: new Date("2025-02-10T14:32:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 2,
+        toId: 1,
+        message: "Hello Sarah, mild cramping is common in the second trimester as your uterus expands. If it becomes severe or is accompanied by bleeding, please call the office immediately.",
+        timestamp: new Date("2025-02-10T15:45:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 1,
+        toId: 2,
+        message: "Thank you for the quick response! The cramping has actually subsided now.",
+        timestamp: new Date("2025-02-10T16:20:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 2,
+        toId: 1,
+        message: "I'm glad to hear that. Don't hesitate to reach out if you have any other concerns.",
+        timestamp: new Date("2025-02-10T17:05:00Z"),
+        read: false
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 1,
+        toId: 2,
+        message: "Dr. Smith, just checking if I need to prepare anything special for my 28-week appointment next month?",
+        timestamp: new Date("2025-04-25T10:15:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 1,
+        fromId: 2,
+        toId: 1,
+        message: "For your 28-week visit, we'll be doing the glucose screening test. Please don't eat for 2 hours before the appointment. No other special preparation needed.",
+        timestamp: new Date("2025-04-25T11:30:00Z"),
+        read: false
+      }
+    ];
+    
+    // Messages between Emily Williams (patient id 3) and Dr. Smith (clinician id 2)
+    const messages2 = [
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 2,
+        fromId: 3,
+        toId: 2,
+        message: "Dr. Smith, I'm concerned about the possibility of another C-section. Can we discuss VBAC options at my next appointment?",
+        timestamp: new Date("2025-04-20T09:45:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 2,
+        fromId: 2,
+        toId: 3,
+        message: "Hi Emily, absolutely. I've scheduled extra time for your 20-week appointment to discuss VBAC options and create a birth plan that addresses your concerns.",
+        timestamp: new Date("2025-04-20T11:20:00Z"),
+        read: true
+      },
+      {
+        id: this.messageIdCounter++,
+        pregnancyId: 2,
+        fromId: 3,
+        toId: 2,
+        message: "Thank you so much, I appreciate your support.",
+        timestamp: new Date("2025-04-20T12:05:00Z"),
+        read: true
+      }
+    ];
+    
+    [...messages, ...messages2].forEach(message => {
+      this.messages.set(message.id, message);
+    });
+  }
+  
   private initializeEducationModules() {
     const modules = [
       {
@@ -357,6 +869,20 @@ export class MemStorage implements IStorage {
         content: "As your baby grows larger, you may experience more discomfort...",
         weekRange: "29-40",
         imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=350"
+      },
+      {
+        title: "Fetal Movement Tracking",
+        description: "Understanding and tracking your baby's movements.",
+        content: "Starting around 28 weeks, it's important to monitor your baby's movements...",
+        weekRange: "28-40",
+        imageUrl: "https://images.unsplash.com/photo-1584187839513-f17c9932806a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=350"
+      },
+      {
+        title: "Common Pregnancy Symptoms",
+        description: "What to expect in each trimester.",
+        content: "Pregnancy brings many physical and emotional changes...",
+        weekRange: "1-40",
+        imageUrl: "https://images.unsplash.com/photo-1591154669695-5f2a8d20c089?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=350"
       }
     ];
     
