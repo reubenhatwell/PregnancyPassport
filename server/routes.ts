@@ -16,6 +16,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes (/api/register, /api/login, /api/logout, /api/user)
   setupAuth(app);
 
+  // Initialize demo data
+  try {
+    // Check if we already have users in the system
+    const users = await storage.getUser(1);
+    if (!users) {
+      console.log("Initializing demo data...");
+      storage.initializeUsers();
+      storage.initializePregnancies();
+      storage.initializeAppointments();
+      storage.initializeVitalStats();
+      storage.initializeTestResults();
+      storage.initializeScans();
+      storage.initializeMessages();
+      storage.initializeEducationModules();
+      console.log("Demo data initialized successfully");
+    }
+  } catch (error) {
+    console.error("Error initializing demo data:", error);
+  }
+
   // Pregnancy routes
   app.get("/api/pregnancy", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
