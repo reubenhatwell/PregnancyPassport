@@ -1,6 +1,6 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, MemStorage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import {
@@ -9,31 +9,90 @@ import {
   insertVitalStatSchema,
   insertTestResultSchema,
   insertScanSchema,
-  insertMessageSchema
+  insertMessageSchema,
+  users
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes (/api/register, /api/login, /api/logout, /api/user)
   setupAuth(app);
 
-  // Initialize demo data
-  try {
-    // Check if we already have users in the system
-    const users = await storage.getUser(1);
-    if (!users) {
-      console.log("Initializing demo data...");
-      storage.initializeUsers();
-      storage.initializePregnancies();
-      storage.initializeAppointments();
-      storage.initializeVitalStats();
-      storage.initializeTestResults();
-      storage.initializeScans();
-      storage.initializeMessages();
-      storage.initializeEducationModules();
-      console.log("Demo data initialized successfully");
+  // Import db and sql if DATABASE_URL is available
+  let db: any;
+  let sql: any;
+  
+  // Special endpoint for database migrations (only available in development)
+  if (process.env.NODE_ENV === 'development' && process.env.DATABASE_URL) {
+    try {
+      const dbModule = await import("./db");
+      db = dbModule.db;
+      
+      const ormModule = await import("drizzle-orm");
+      sql = ormModule.sql;
+    } catch (err) {
+      console.error("Error importing database modules:", err);
     }
-  } catch (error) {
-    console.error("Error initializing demo data:", error);
+    
+    app.post("/api/db/migrate", async (req, res) => {
+      try {
+        // Push the schema to the database
+        await sql.raw(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+        console.log("Running migration...");
+        
+        // Seed demo data if requested
+        if (req.query.seed === 'true') {
+          console.log("Seeding demo data...");
+          // First check if we have any users
+          const usersExist = await db.select().from(users).limit(1);
+          
+          if (usersExist.length === 0) {
+            console.log("No users found, initializing demo data");
+            // Use MemStorage to initialize data, then insert into database
+            const memStorage = new MemStorage();
+            
+            memStorage.initializeUsers();
+            memStorage.initializePregnancies();
+            memStorage.initializeAppointments();
+            memStorage.initializeVitalStats(); 
+            memStorage.initializeTestResults();
+            memStorage.initializeScans();
+            memStorage.initializeMessages();
+            memStorage.initializeEducationModules();
+            
+            console.log("Demo data initialized successfully");
+          } else {
+            console.log("Users already exist, skipping demo data initialization");
+          }
+        }
+        
+        res.status(200).send("Migration completed");
+      } catch (error) {
+        console.error("Migration error:", error);
+        res.status(500).send(`Migration failed: ${error.message}`);
+      }
+    });
+  }
+  
+  // Initialize demo data for memory storage (only if not using a database)
+  if (!process.env.DATABASE_URL) {
+    try {
+      // Check if we already have users in the system
+      const users = await storage.getUser(1);
+      if (!users) {
+        console.log("Initializing in-memory demo data...");
+        storage.initializeUsers();
+        storage.initializePregnancies();
+        storage.initializeAppointments();
+        storage.initializeVitalStats();
+        storage.initializeTestResults();
+        storage.initializeScans();
+        storage.initializeMessages();
+        storage.initializeEducationModules();
+        console.log("Demo data initialized successfully");
+      }
+    } catch (error) {
+      console.error("Error initializing demo data:", error);
+    }
   }
 
   // Pregnancy routes
