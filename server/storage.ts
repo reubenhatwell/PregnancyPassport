@@ -339,8 +339,8 @@ export class MemStorage implements IStorage {
     return module;
   }
   
-  // Initialize education modules with some data
-  private initializeUsers() {
+  // Initialize methods for demo data
+  initializeUsers() {
     // Create a patient user
     const patient = {
       id: this.userIdCounter++,
@@ -349,7 +349,7 @@ export class MemStorage implements IStorage {
       email: "sarah@example.com",
       firstName: "Sarah",
       lastName: "Johnson",
-      role: "patient"
+      role: "patient" as const
     };
     this.users.set(patient.id, patient);
     
@@ -361,7 +361,7 @@ export class MemStorage implements IStorage {
       email: "dr.smith@hospital.com",
       firstName: "Jane",
       lastName: "Smith",
-      role: "clinician"
+      role: "clinician" as const
     };
     this.users.set(clinician.id, clinician);
     
@@ -373,12 +373,12 @@ export class MemStorage implements IStorage {
       email: "emily@example.com",
       firstName: "Emily",
       lastName: "Williams",
-      role: "patient"
+      role: "patient" as const
     };
     this.users.set(patient2.id, patient2);
   }
   
-  private initializePregnancies() {
+  initializePregnancies() {
     // Pregnancy for Sarah Johnson (patient id 1)
     const pregnancy1 = {
       id: this.pregnancyIdCounter++,
@@ -400,7 +400,7 @@ export class MemStorage implements IStorage {
     this.pregnancies.set(pregnancy2.id, pregnancy2);
   }
   
-  private initializeAppointments() {
+  initializeAppointments() {
     // Past appointments for Sarah Johnson
     const pastAppointments = [
       {
@@ -526,7 +526,7 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeVitalStats() {
+  initializeVitalStats() {
     // Vital stats for Sarah Johnson (pregnancy id 1)
     const vitalStats = [
       {
@@ -606,7 +606,7 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeTestResults() {
+  initializeTestResults() {
     // Test results for Sarah Johnson (pregnancy id 1)
     const testResults = [
       {
@@ -697,7 +697,7 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeScans() {
+  initializeScans() {
     // Scans for Sarah Johnson (pregnancy id 1)
     const scans = [
       {
@@ -738,7 +738,7 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeMessages() {
+  initializeMessages() {
     // Messages between Sarah Johnson (patient id 1) and Dr. Smith (clinician id 2)
     const messages = [
       {
@@ -833,7 +833,7 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeEducationModules() {
+  initializeEducationModules() {
     const modules = [
       {
         title: "Nutrition in the Second Trimester",
