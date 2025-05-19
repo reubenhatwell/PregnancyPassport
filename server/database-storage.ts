@@ -1,6 +1,8 @@
 import { 
   users, appointments, pregnancies, vitalStats, testResults, 
-  scans, messages, educationModules,
+  scans, messages, educationModules, educationProgress,
+  healthProviders, patientProviderIntegrations, securityLogs,
+  dataConsents,
   type User, type InsertUser,
   type Pregnancy, type InsertPregnancy,
   type Appointment, type InsertAppointment,
@@ -8,7 +10,12 @@ import {
   type TestResult, type InsertTestResult,
   type Scan, type InsertScan,
   type Message, type InsertMessage,
-  type EducationModule, type InsertEducationModule
+  type EducationModule, type InsertEducationModule,
+  type EducationProgress, type InsertEducationProgress,
+  type HealthProvider, type InsertHealthProvider,
+  type PatientProviderIntegration, type InsertPatientProviderIntegration,
+  type SecurityLog, type InsertSecurityLog,
+  type DataConsent, type InsertDataConsent
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -24,14 +31,17 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     // Use an in-memory session store if db is not available
-    this.sessionStore = process.env.DATABASE_URL
-      ? new connectPg(session)({ 
-          conObject: { connectionString: process.env.DATABASE_URL }, 
-          createTableIfMissing: true 
-        })
-      : new MemoryStore({
-          checkPeriod: 86400000 // prune expired entries every 24h
-        });
+    if (process.env.DATABASE_URL) {
+      const PgStore = connectPg(session);
+      this.sessionStore = new PgStore({ 
+        conObject: { connectionString: process.env.DATABASE_URL }, 
+        createTableIfMissing: true 
+      });
+    } else {
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+      });
+    }
   }
 
   // User operations
@@ -224,6 +234,120 @@ export class DatabaseStorage implements IStorage {
   async createEducationModule(insertModule: InsertEducationModule): Promise<EducationModule> {
     const [module] = await db.insert(educationModules).values(insertModule).returning();
     return module;
+  }
+
+  // Get all patients for clinician dashboard
+  async getAllPatients(): Promise<User[]> {
+    if (!db) return [];
+    return db.select().from(users).where(eq(users.role, "patient"));
+  }
+
+  // Get all appointments for clinician view
+  async getAllAppointments(): Promise<Appointment[]> {
+    if (!db) return [];
+    return db.select().from(appointments).orderBy(appointments.dateTime);
+  }
+
+  // Get all test results for clinician view
+  async getAllTestResults(): Promise<TestResult[]> {
+    if (!db) return [];
+    return db.select().from(testResults).orderBy(desc(testResults.date));
+  }
+
+  // Education progress methods
+  async getEducationProgressForUser(userId: number): Promise<EducationProgress[]> {
+    if (!db) return [];
+    return db.select().from(educationProgress).where(eq(educationProgress.userId, userId));
+  }
+
+  async createEducationProgress(insertProgress: InsertEducationProgress): Promise<EducationProgress> {
+    if (!db) throw new Error("Database not available");
+    const [progress] = await db.insert(educationProgress).values(insertProgress).returning();
+    return progress;
+  }
+
+  async updateEducationProgress(id: number, updates: Partial<EducationProgress>): Promise<EducationProgress> {
+    if (!db) throw new Error("Database not available");
+    const [updated] = await db.update(educationProgress)
+      .set({...updates, updatedAt: new Date()})
+      .where(eq(educationProgress.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Health Provider methods
+  async getAllHealthProviders(): Promise<HealthProvider[]> {
+    if (!db) return [];
+    return db.select().from(healthProviders).where(eq(healthProviders.active, true));
+  }
+
+  async getHealthProvider(id: number): Promise<HealthProvider | undefined> {
+    if (!db) return undefined;
+    const [provider] = await db.select().from(healthProviders).where(eq(healthProviders.id, id));
+    return provider;
+  }
+
+  async createHealthProvider(insertProvider: InsertHealthProvider): Promise<HealthProvider> {
+    if (!db) throw new Error("Database not available");
+    const [provider] = await db.insert(healthProviders).values(insertProvider).returning();
+    return provider;
+  }
+
+  // Patient Provider Integration methods
+  async getPatientIntegrations(patientId: number): Promise<PatientProviderIntegration[]> {
+    if (!db) return [];
+    return db.select().from(patientProviderIntegrations)
+      .where(eq(patientProviderIntegrations.patientId, patientId));
+  }
+
+  async createPatientIntegration(insertIntegration: InsertPatientProviderIntegration): Promise<PatientProviderIntegration> {
+    if (!db) throw new Error("Database not available");
+    const [integration] = await db.insert(patientProviderIntegrations).values(insertIntegration).returning();
+    return integration;
+  }
+
+  async updatePatientIntegration(id: number, updates: Partial<PatientProviderIntegration>): Promise<PatientProviderIntegration> {
+    if (!db) throw new Error("Database not available");
+    const [updated] = await db.update(patientProviderIntegrations)
+      .set({...updates, updatedAt: new Date()})
+      .where(eq(patientProviderIntegrations.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Security and Logging methods
+  async logSecurityEvent(insertLog: InsertSecurityLog): Promise<SecurityLog> {
+    if (!db) throw new Error("Database not available");
+    const [log] = await db.insert(securityLogs).values(insertLog).returning();
+    return log;
+  }
+
+  async getUserSecurityLogs(userId: number): Promise<SecurityLog[]> {
+    if (!db) return [];
+    return db.select().from(securityLogs)
+      .where(eq(securityLogs.userId, userId))
+      .orderBy(desc(securityLogs.timestamp));
+  }
+
+  // Data Consent methods
+  async getUserConsents(userId: number): Promise<DataConsent[]> {
+    if (!db) return [];
+    return db.select().from(dataConsents).where(eq(dataConsents.userId, userId));
+  }
+
+  async createDataConsent(insertConsent: InsertDataConsent): Promise<DataConsent> {
+    if (!db) throw new Error("Database not available");
+    const [consent] = await db.insert(dataConsents).values(insertConsent).returning();
+    return consent;
+  }
+
+  async updateDataConsent(id: number, updates: Partial<DataConsent>): Promise<DataConsent> {
+    if (!db) throw new Error("Database not available");
+    const [updated] = await db.update(dataConsents)
+      .set({...updates, updatedAt: new Date()})
+      .where(eq(dataConsents.id, id))
+      .returning();
+    return updated;
   }
 
   // Demo data initialization methods

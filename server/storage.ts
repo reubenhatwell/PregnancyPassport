@@ -920,6 +920,8 @@ import { DatabaseStorage } from './database-storage';
 // MemStorage is already exported by the class declaration above
 
 // Use DatabaseStorage if DATABASE_URL is set, otherwise fallback to MemStorage
-export const storage = process.env.DATABASE_URL
-  ? new DatabaseStorage()
+import { DatabaseStorage } from "./database-storage";
+
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage() 
   : new MemStorage();

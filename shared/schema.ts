@@ -1,6 +1,14 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Enums for better type safety and consistent data
+export const roleEnum = pgEnum('role_type', ['patient', 'clinician', 'admin']);
+export const languageEnum = pgEnum('language_type', ['english', 'arabic', 'chinese', 'vietnamese', 'spanish', 'hindi', 'other']);
+export const pregnancyTypeEnum = pgEnum('pregnancy_type_enum', ['singleton', 'twin', 'triplet', 'higher_multiple']);
+export const appointmentStatusEnum = pgEnum('appointment_status', ['scheduled', 'completed', 'cancelled', 'rescheduled', 'no_show']);
+export const notificationTypeEnum = pgEnum('notification_type', ['appointment', 'test_result', 'message', 'education', 'health_alert']);
+export const testResultStatusEnum = pgEnum('test_result_status', ['normal', 'abnormal', 'follow_up']);
 
 // User Schema
 export const users = pgTable("users", {
@@ -10,7 +18,15 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  role: text("role", { enum: ["patient", "clinician"] }).notNull().default("patient"),
+  role: roleEnum("role").notNull().default("patient"),
+  profileImageUrl: text("profile_image_url"),
+  phoneNumber: text("phone_number"),
+  preferredLanguage: languageEnum("preferred_language").default("english"),
+  accessibilitySettings: jsonb("accessibility_settings"),
+  notificationPreferences: jsonb("notification_preferences"),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -112,14 +128,25 @@ export const insertPregnancySchema = createInsertSchema(pregnancies).omit({
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
   pregnancyId: integer("pregnancy_id").notNull().references(() => pregnancies.id),
+  clinicianId: integer("clinician_id").references(() => users.id),
   title: text("title").notNull(),
   description: text("description"),
   location: text("location"),
+  locationDetails: jsonb("location_details"), // Address, room number, floor, etc.
   clinicianName: text("clinician_name"),
   dateTime: timestamp("date_time").notNull(),
   duration: integer("duration").notNull().default(30), // in minutes
+  status: appointmentStatusEnum("status").notNull().default("scheduled"),
+  reminderSent: boolean("reminder_sent").notNull().default(false),
+  reminderTime: integer("reminder_time").default(24), // hours before appointment
   notes: text("notes"),
-  completed: boolean("completed").notNull().default(false),
+  patientNotes: text("patient_notes"), // Notes from the patient about the appointment
+  followupNeeded: boolean("followup_needed").default(false),
+  followupReason: text("followup_reason"),
+  attachments: jsonb("attachments"), // Array of file URLs/metadata
+  type: text("type"), // Regular, Ultrasound, Blood Test, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({
@@ -199,6 +226,31 @@ export const educationModules = pgTable("education_modules", {
   content: text("content").notNull(),
   weekRange: text("week_range").notNull(), // e.g. "20-28"
   imageUrl: text("image_url"),
+  videoUrl: text("video_url"),
+  tags: jsonb("tags"), // For filtering/categorization
+  languages: jsonb("languages"), // Available languages for this content
+  difficulty: text("difficulty"), // Easy, Medium, Advanced
+  category: text("category"), // Nutrition, Exercise, Prenatal Care, etc.
+  resources: jsonb("resources"), // Additional external resources
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User Progress on Education Modules
+export const educationProgress = pgTable("education_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  moduleId: integer("module_id").notNull().references(() => educationModules.id),
+  completed: boolean("completed").notNull().default(false),
+  lastAccessed: timestamp("last_accessed"),
+  notes: text("notes"),
+  bookmark: text("bookmark"), // Store position in video or specific section
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEducationProgressSchema = createInsertSchema(educationProgress).omit({
+  id: true,
 });
 
 export const insertEducationModuleSchema = createInsertSchema(educationModules).omit({
@@ -227,5 +279,92 @@ export type InsertScan = z.infer<typeof insertScanSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
+// Provider Integration
+export const healthProviders = pgTable("health_providers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // Hospital, Clinic, Private Practice, etc.
+  address: text("address"),
+  contactPhone: text("contact_phone"),
+  contactEmail: text("contact_email"),
+  website: text("website"),
+  apiEndpoint: text("api_endpoint"),
+  apiAuthType: text("api_auth_type"), // OAuth, API Key, etc.
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertHealthProviderSchema = createInsertSchema(healthProviders).omit({
+  id: true,
+});
+
+// Provider Integrations for Patients
+export const patientProviderIntegrations = pgTable("patient_provider_integrations", {
+  id: serial("id").primaryKey(),
+  patientId: integer("patient_id").notNull().references(() => users.id),
+  providerId: integer("provider_id").notNull().references(() => healthProviders.id),
+  authStatus: text("auth_status").notNull().default("pending"), // pending, authorized, revoked
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  scope: text("scope"),
+  lastSyncDate: timestamp("last_sync_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPatientProviderIntegrationSchema = createInsertSchema(patientProviderIntegrations).omit({
+  id: true,
+});
+
+// Security and Audit Logging
+export const securityLogs = pgTable("security_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  action: text("action").notNull(), // login, logout, data_access, data_modification, etc.
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  details: jsonb("details"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const insertSecurityLogSchema = createInsertSchema(securityLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
+// Data Access Consent Records
+export const dataConsents = pgTable("data_consents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  consentType: text("consent_type").notNull(), // research, data_sharing, third_party_access, etc.
+  consentGiven: boolean("consent_given").notNull(),
+  consentDetails: jsonb("consent_details"),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDataConsentSchema = createInsertSchema(dataConsents).omit({
+  id: true,
+});
+
+// Export Types
 export type EducationModule = typeof educationModules.$inferSelect;
 export type InsertEducationModule = z.infer<typeof insertEducationModuleSchema>;
+
+export type EducationProgress = typeof educationProgress.$inferSelect;
+export type InsertEducationProgress = z.infer<typeof insertEducationProgressSchema>;
+
+export type HealthProvider = typeof healthProviders.$inferSelect;
+export type InsertHealthProvider = z.infer<typeof insertHealthProviderSchema>;
+
+export type PatientProviderIntegration = typeof patientProviderIntegrations.$inferSelect;
+export type InsertPatientProviderIntegration = z.infer<typeof insertPatientProviderIntegrationSchema>;
+
+export type SecurityLog = typeof securityLogs.$inferSelect;
+export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
+
+export type DataConsent = typeof dataConsents.$inferSelect;
+export type InsertDataConsent = z.infer<typeof insertDataConsentSchema>;
