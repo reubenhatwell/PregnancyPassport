@@ -95,9 +95,7 @@ export default function AuthPage() {
         <Card className="w-full max-w-md shadow-xl border-0">
           <CardHeader className="space-y-1 text-center bg-gradient-to-r from-pink-50 to-pink-100 rounded-t-lg py-6">
             <div className="flex justify-center mb-4">
-              <div className="shadow-md">
-                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />
-              </div>
+              <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />
             </div>
             <CardTitle className="text-3xl font-heading text-primary-700">
               Digital Pregnancy Passport

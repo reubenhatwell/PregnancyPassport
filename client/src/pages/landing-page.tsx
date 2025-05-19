@@ -128,9 +128,7 @@ export default function LandingPage() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <div className="shadow-sm">
-                  <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-10 w-auto" />
-                </div>
+                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-10 w-auto" />
                 <span className="ml-2 text-xl font-bold text-gray-900">Digital Pregnancy Passport</span>
               </div>
             </div>
@@ -244,9 +242,7 @@ export default function LandingPage() {
             <div className="md:flex md:items-center md:justify-between">
               <div className="md:max-w-2xl mb-8 md:mb-0">
                 <div className="flex items-center justify-start mb-6">
-                  <div className="shadow-md">
-                    <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-32 w-auto" />
-                  </div>
+                  <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-32 w-auto" />
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                   Digital Pregnancy Passport
