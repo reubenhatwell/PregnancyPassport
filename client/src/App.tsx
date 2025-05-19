@@ -16,6 +16,7 @@ import Messages from "@/pages/messages";
 import Education from "@/pages/education";
 import Settings from "@/pages/settings";
 import AntenatalRecord from "@/pages/antenatal-record";
+import ClinicianDashboard from "@/pages/clinician-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <ProtectedRoute path="/messages" component={Messages} />
       <ProtectedRoute path="/education" component={Education} />
       <ProtectedRoute path="/settings" component={Settings} />
+      <ProtectedRoute path="/clinician" component={ClinicianDashboard} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

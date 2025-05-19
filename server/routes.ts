@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage, MemStorage } from "./storage";
 import { setupAuth } from "./auth";
+import { registerClinicianRoutes } from "./clinician-routes";
 import { z } from "zod";
 import {
   insertPregnancySchema,
@@ -16,6 +17,9 @@ import {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes (/api/register, /api/login, /api/logout, /api/user)
   setupAuth(app);
+  
+  // Register clinician-specific routes
+  registerClinicianRoutes(app, storage);
 
   // Import db and sql if DATABASE_URL is available
   let db: any;
