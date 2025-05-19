@@ -140,10 +140,10 @@ export default function AuthPage() {
                                   <span>Patient</span>
                                 </Label>
                               </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-primary-50 border-primary-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
                                 <RadioGroupItem value="clinician" id="login-clinician" className="sr-only" />
                                 <Label htmlFor="login-clinician" className="flex items-center cursor-pointer">
-                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-primary-500" : "text-primary-400"}`} />
+                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
                                   <span>Clinician</span>
                                 </Label>
                               </div>
@@ -276,10 +276,10 @@ export default function AuthPage() {
                                   <span>Patient</span>
                                 </Label>
                               </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-primary-50 border-primary-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
                                 <RadioGroupItem value="clinician" id="clinician" className="sr-only" />
                                 <Label htmlFor="clinician" className="flex items-center cursor-pointer">
-                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-primary-500" : "text-primary-400"}`} />
+                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
                                   <span>Clinician</span>
                                 </Label>
                               </div>
