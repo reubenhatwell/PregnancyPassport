@@ -89,25 +89,42 @@ export default function AuthPage() {
   const isPending = loginMutation.isPending || registerMutation.isPending || isLoading;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-primary-500 to-primary-700">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-600 to-primary-800">
       <div className="flex-1 flex items-center justify-center p-4 md:p-8">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-heading text-primary-600">
+        <Card className="w-full max-w-md shadow-xl border-0">
+          <CardHeader className="space-y-1 text-center bg-gradient-to-r from-primary-100 to-pink-100 rounded-t-lg py-6">
+            <div className="flex justify-center mb-1">
+              <Baby className="h-10 w-10 text-primary-600" />
+            </div>
+            <CardTitle className="text-3xl font-heading text-primary-700">
               Digital Pregnancy Passport
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-700 text-lg">
               Your pregnancy journey in one secure place
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100">
+                <TabsTrigger value="login" className="text-base">Login</TabsTrigger>
+                <TabsTrigger value="register" className="text-base">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <ShieldCheck className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-blue-800">Welcome back!</h3>
+                      <div className="mt-1 text-sm text-blue-700">
+                        Log in securely to access your personalized pregnancy journey.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 <Form {...loginForm}>
                   <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                     <FormField
@@ -115,11 +132,11 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel className="text-gray-700">Username</FormLabel>
                           <FormControl>
-                            <Input placeholder="johndoe" {...field} />
+                            <Input placeholder="johndoe" className="border-gray-300" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -128,11 +145,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel className="text-gray-700">Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input type="password" placeholder="••••••••" className="border-gray-300" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -142,30 +159,30 @@ export default function AuthPage() {
                       name="role"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel>Login as</FormLabel>
+                          <FormLabel className="text-gray-700">Login as</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
                               defaultValue={field.value}
                               className="flex space-x-1"
                             >
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
                                 <RadioGroupItem value="patient" id="login-patient" className="sr-only" />
                                 <Label htmlFor="login-patient" className="flex items-center cursor-pointer">
-                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-500"}`} />
-                                  <span>Patient</span>
+                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-400"}`} />
+                                  <span className="text-gray-700">Patient</span>
                                 </Label>
                               </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
                                 <RadioGroupItem value="clinician" id="login-clinician" className="sr-only" />
                                 <Label htmlFor="login-clinician" className="flex items-center cursor-pointer">
                                   <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
-                                  <span>Clinician</span>
+                                  <span className="text-gray-700">Clinician</span>
                                 </Label>
                               </div>
                             </RadioGroup>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -185,7 +202,7 @@ export default function AuthPage() {
                         Forgot password?
                       </Button>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isPending}>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white" disabled={isPending}>
                       {isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -200,6 +217,23 @@ export default function AuthPage() {
               </TabsContent>
               
               <TabsContent value="register">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h3 className="font-medium text-primary-700 mb-3 flex items-center">
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      Everything in One Place
+                    </h3>
+                    <p className="text-sm text-gray-600">Track your appointments, test results, and vital stats throughout your pregnancy journey.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-primary-700 mb-3 flex items-center">
+                      <ShieldCheck className="h-5 w-5 mr-2" />
+                      Secure & Private
+                    </h3>
+                    <p className="text-sm text-gray-600">Your data is protected with industry-leading security standards and privacy controls.</p>
+                  </div>
+                </div>
+                
                 <Form {...registerForm}>
                   <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -208,11 +242,11 @@ export default function AuthPage() {
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name</FormLabel>
+                            <FormLabel className="text-gray-700">First Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="John" {...field} />
+                              <Input placeholder="John" className="border-gray-300" {...field} />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-red-500" />
                           </FormItem>
                         )}
                       />
@@ -221,11 +255,11 @@ export default function AuthPage() {
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name</FormLabel>
+                            <FormLabel className="text-gray-700">Last Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Doe" {...field} />
+                              <Input placeholder="Doe" className="border-gray-300" {...field} />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-red-500" />
                           </FormItem>
                         )}
                       />
@@ -236,11 +270,11 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel className="text-gray-700">Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="john.doe@example.com" {...field} />
+                            <Input type="email" placeholder="john.doe@example.com" className="border-gray-300" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -250,11 +284,11 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel className="text-gray-700">Username</FormLabel>
                           <FormControl>
-                            <Input placeholder="johndoe" {...field} />
+                            <Input placeholder="johndoe" className="border-gray-300" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -264,11 +298,14 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel className="text-gray-700">Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input type="password" placeholder="••••••••" className="border-gray-300" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
+                          <FormDescription className="text-gray-500 text-xs">
+                            Must be at least 8 characters long
+                          </FormDescription>
                         </FormItem>
                       )}
                     />
@@ -278,44 +315,63 @@ export default function AuthPage() {
                       name="role"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel>Account Type</FormLabel>
+                          <FormLabel className="text-gray-700">Account Type</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
                               defaultValue={field.value}
                               className="flex space-x-1"
                             >
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
                                 <RadioGroupItem value="patient" id="patient" className="sr-only" />
                                 <Label htmlFor="patient" className="flex items-center cursor-pointer">
-                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-500"}`} />
-                                  <span>Patient</span>
+                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-400"}`} />
+                                  <span className="text-gray-700">Patient</span>
                                 </Label>
                               </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-200" : "border-gray-200"}`}>
+                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
                                 <RadioGroupItem value="clinician" id="clinician" className="sr-only" />
                                 <Label htmlFor="clinician" className="flex items-center cursor-pointer">
                                   <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
-                                  <span>Clinician</span>
+                                  <span className="text-gray-700">Clinician</span>
                                 </Label>
                               </div>
                             </RadioGroup>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
                     
-                    <Button type="submit" className="w-full" disabled={isPending}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 mb-2">
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
+                        <Calendar className="h-5 w-5 text-primary-500 mb-2" />
+                        <span className="text-xs text-gray-700">Track Appointments</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
+                        <MessageSquare className="h-5 w-5 text-primary-500 mb-2" />
+                        <span className="text-xs text-gray-700">Secure Messaging</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
+                        <FileText className="h-5 w-5 text-primary-500 mb-2" />
+                        <span className="text-xs text-gray-700">Health Records</span>
+                      </div>
+                    </div>
+                    
+                    <Button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white" disabled={isPending}>
                       {isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Creating account...
                         </>
                       ) : (
-                        "Create account"
+                        "Create Account"
                       )}
                     </Button>
+                    
+                    <p className="text-xs text-center text-gray-500 mt-4">
+                      By creating an account, you agree to our Terms of Service and Privacy Policy.
+                    </p>
                   </form>
                 </Form>
               </TabsContent>
