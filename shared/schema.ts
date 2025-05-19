@@ -21,9 +21,87 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const pregnancies = pgTable("pregnancies", {
   id: serial("id").primaryKey(),
   patientId: integer("patient_id").notNull().references(() => users.id),
+  
+  // Basic pregnancy information
   dueDate: date("due_date").notNull(),
-  startDate: date("start_date").notNull(),
+  startDate: date("start_date").notNull(), 
+  lastMenstrualPeriod: date("last_menstrual_period"),
+  edbDeterminedBy: text("edb_determined_by"), // LMP/dating scan/other
+  pregnancyType: text("pregnancy_type"), // Singleton, Multiple
   notes: text("notes"),
+  
+  // Patient Identification (Additional fields)
+  medicalRecordNumber: text("medical_record_number"),
+  sex: text("sex"),
+  facility: text("facility"),
+  locationWard: text("location_ward"),
+  
+  // Personal Details
+  preferredName: text("preferred_name"),
+  emergencyContact: text("emergency_contact"),
+  countryOfBirth: text("country_of_birth"),
+  interpreterRequired: boolean("interpreter_required"),
+  language: text("language"),
+  contactNumber: text("contact_number"),
+  descent: text("descent"), // Aboriginal, Torres Strait Islander, both, or neither
+  culturalReligiousConsiderations: text("cultural_religious_considerations"),
+  plannedPlaceOfBirth: text("planned_place_of_birth"),
+  birthUnitContactNumber: text("birth_unit_contact_number"),
+  modelOfCare: text("model_of_care"),
+  leadCareProvider: text("lead_care_provider"),
+  leadCareProviderContactNumber: text("lead_care_provider_contact_number"),
+  
+  // Pregnancy Details
+  prePregnancyWeight: integer("pre_pregnancy_weight"),
+  bodyMassIndex: integer("body_mass_index"),
+  pregnancyIntention: text("pregnancy_intention"),
+  bookingWeeks: text("booking_weeks"), // 28 weeks, 36 weeks, or other
+  
+  // Lifestyle Considerations
+  substanceUse: jsonb("substance_use"), // Alcohol, Tobacco, etc
+  
+  // Antenatal Screening
+  hepatitisB: text("hepatitis_b"),
+  hepatitisC: text("hepatitis_c"),
+  rubella: text("rubella"),
+  syphilis: text("syphilis"),
+  hiv: text("hiv"),
+  groupBStreptococcus: text("group_b_streptococcus"),
+  diabetes: text("diabetes"),
+  venousThromboembolismRisk: text("venous_thromboembolism_risk"), // Low / Intermediate / High
+  
+  // Blood Group
+  bloodGroup: text("blood_group"),
+  rhFactor: text("rh_factor"),
+  antibodyScreen: text("antibody_screen"),
+  haemoglobin: text("haemoglobin"),
+  midstreamUrine: text("midstream_urine"),
+  
+  // Mental Health
+  edinburghPostnatalDepressionScale: integer("edinburgh_postnatal_depression_scale"),
+  epdsDate: date("epds_date"),
+  epdsReferral: boolean("epds_referral"),
+  
+  // Prenatal Testing
+  prenatalTesting: jsonb("prenatal_testing"), // CVS/Amniocentesis, nuchal translucency, etc
+  
+  // Previous Pregnancies
+  previousPregnancies: jsonb("previous_pregnancies"),
+  gravidity: integer("gravidity"), // Number of pregnancies
+  parity: integer("parity"), // Number of births
+  
+  // Health Considerations
+  medications: jsonb("medications"),
+  adverseReactions: jsonb("adverse_reactions"),
+  medicalConsiderations: text("medical_considerations"),
+  gynecologicalConsiderations: text("gynecological_considerations"),
+  majorSurgeries: text("major_surgeries"),
+  mentalHealthDiagnosis: text("mental_health_diagnosis"),
+  nonPrescriptionMedication: text("non_prescription_medication"),
+  previousThromboticEvents: text("previous_thrombotic_events"),
+  vitamins: text("vitamins"),
+  otherConsiderations: text("other_considerations"),
+  lastPapSmearDate: date("last_pap_smear_date"),
 });
 
 export const insertPregnancySchema = createInsertSchema(pregnancies).omit({

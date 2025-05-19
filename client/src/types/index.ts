@@ -12,9 +12,87 @@ export interface User {
 export interface Pregnancy {
   id: number;
   patientId: number;
+  
+  // Basic pregnancy information
   dueDate: string;
   startDate: string;
+  lastMenstrualPeriod?: string;
+  edbDeterminedBy?: string; // LMP/dating scan/other
+  pregnancyType?: string; // Singleton, Multiple
   notes?: string;
+  
+  // Patient Identification (Additional fields)
+  medicalRecordNumber?: string;
+  sex?: string;
+  facility?: string;
+  locationWard?: string;
+  
+  // Personal Details
+  preferredName?: string;
+  emergencyContact?: string;
+  countryOfBirth?: string;
+  interpreterRequired?: boolean;
+  language?: string;
+  contactNumber?: string;
+  descent?: string; // Aboriginal, Torres Strait Islander, both, or neither
+  culturalReligiousConsiderations?: string;
+  plannedPlaceOfBirth?: string;
+  birthUnitContactNumber?: string;
+  modelOfCare?: string;
+  leadCareProvider?: string;
+  leadCareProviderContactNumber?: string;
+  
+  // Pregnancy Details
+  prePregnancyWeight?: number;
+  bodyMassIndex?: number;
+  pregnancyIntention?: string;
+  bookingWeeks?: string; // 28 weeks, 36 weeks, or other
+  
+  // Lifestyle Considerations
+  substanceUse?: any; // Alcohol, Tobacco, etc
+  
+  // Antenatal Screening
+  hepatitisB?: string;
+  hepatitisC?: string;
+  rubella?: string;
+  syphilis?: string;
+  hiv?: string;
+  groupBStreptococcus?: string;
+  diabetes?: string;
+  venousThromboembolismRisk?: string; // Low / Intermediate / High
+  
+  // Blood Group
+  bloodGroup?: string;
+  rhFactor?: string;
+  antibodyScreen?: string;
+  haemoglobin?: string;
+  midstreamUrine?: string;
+  
+  // Mental Health
+  edinburghPostnatalDepressionScale?: number;
+  epdsDate?: string;
+  epdsReferral?: boolean;
+  
+  // Prenatal Testing
+  prenatalTesting?: any; // CVS/Amniocentesis, nuchal translucency, etc
+  
+  // Previous Pregnancies
+  previousPregnancies?: any;
+  gravidity?: number; // Number of pregnancies
+  parity?: number; // Number of births
+  
+  // Health Considerations
+  medications?: any;
+  adverseReactions?: any;
+  medicalConsiderations?: string;
+  gynecologicalConsiderations?: string;
+  majorSurgeries?: string;
+  mentalHealthDiagnosis?: string;
+  nonPrescriptionMedication?: string;
+  previousThromboticEvents?: string;
+  vitamins?: string;
+  otherConsiderations?: string;
+  lastPapSmearDate?: string;
 }
 
 export interface Appointment {

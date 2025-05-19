@@ -50,6 +50,12 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       icon: Heart,
     },
     {
+      name: "antenatal-record",
+      label: "Antenatal Record",
+      path: "/antenatal-record",
+      icon: FileText,
+    },
+    {
       name: "scans-images",
       label: "Scans & Images",
       path: "/scans-images",

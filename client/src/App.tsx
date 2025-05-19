@@ -15,6 +15,7 @@ import TestResults from "@/pages/test-results";
 import Messages from "@/pages/messages";
 import Education from "@/pages/education";
 import Settings from "@/pages/settings";
+import AntenatalRecord from "@/pages/antenatal-record";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/health-tracking" component={HealthTracking} />
       <ProtectedRoute path="/scans-images" component={ScansImages} />
       <ProtectedRoute path="/test-results" component={TestResults} />
+      <ProtectedRoute path="/antenatal-record" component={AntenatalRecord} />
       <ProtectedRoute path="/messages" component={Messages} />
       <ProtectedRoute path="/education" component={Education} />
       <ProtectedRoute path="/settings" component={Settings} />
