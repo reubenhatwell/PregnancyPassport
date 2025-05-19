@@ -26,7 +26,7 @@ import {
   Globe,
   LucideIcon
 } from "lucide-react";
-import logoImage from "../assets/logo.jpg";
+import logoImage from "../assets/new-logo.jpg";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -128,8 +128,10 @@ export default function LandingPage() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-12 w-auto mr-2" />
-                <span className="ml-1 text-xl font-bold text-gray-900">Digital Pregnancy Passport</span>
+                <div className="rounded-full bg-pink-50 p-1.5 shadow-sm">
+                  <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-8 w-auto opacity-95" />
+                </div>
+                <span className="ml-2 text-xl font-bold text-gray-900">Digital Pregnancy Passport</span>
               </div>
             </div>
             
@@ -242,7 +244,9 @@ export default function LandingPage() {
             <div className="md:flex md:items-center md:justify-between">
               <div className="md:max-w-2xl mb-8 md:mb-0">
                 <div className="flex items-center justify-start mb-6">
-                  <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-20 w-auto mr-4" />
+                  <div className="rounded-full bg-gradient-to-r from-pink-50 to-white p-4 shadow-sm">
+                    <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-20 w-auto" />
+                  </div>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                   Digital Pregnancy Passport
