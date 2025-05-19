@@ -240,8 +240,11 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-center md:justify-between">
               <div className="md:max-w-2xl mb-8 md:mb-0">
+                <div className="flex items-center justify-start mb-6">
+                  <img src="/src/assets/logo.jpg" alt="Digital Pregnancy Passport Logo" className="h-20 w-auto mr-4" />
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                  Australia's First Digital Pregnancy Passport
+                  Digital Pregnancy Passport
                 </h1>
                 <p className="text-lg md:text-xl text-gray-700 mb-6">
                   A secure, comprehensive digital platform connecting patients and clinicians for better pregnancy care.
