@@ -25,6 +25,9 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth-page" component={AuthPage} />
+      
+      {/* Patient routes */}
+      <ProtectedRoute path="/patient-dashboard" component={Dashboard} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/appointments" component={Appointments} />
       <ProtectedRoute path="/health-tracking" component={HealthTracking} />
@@ -34,6 +37,9 @@ function Router() {
       <ProtectedRoute path="/messages" component={Messages} />
       <ProtectedRoute path="/education" component={Education} />
       <ProtectedRoute path="/settings" component={Settings} />
+      
+      {/* Clinician routes */}
+      <ProtectedRoute path="/clinician-dashboard" component={ClinicianDashboard} />
       <ProtectedRoute path="/clinician" component={ClinicianDashboard} />
       <Route component={NotFound} />
     </Switch>

@@ -37,6 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Redirect to appropriate dashboard based on user role
+      if (user.role === "patient") {
+        window.location.href = "/patient-dashboard";
+      } else if (user.role === "clinician") {
+        window.location.href = "/clinician-dashboard";
+      }
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.firstName}!`,
@@ -58,6 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Redirect to appropriate dashboard based on user role
+      if (user.role === "patient") {
+        window.location.href = "/patient-dashboard";
+      } else if (user.role === "clinician") {
+        window.location.href = "/clinician-dashboard";
+      }
+      
       toast({
         title: "Registration successful",
         description: `Welcome, ${user.firstName}!`,
