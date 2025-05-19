@@ -138,7 +138,10 @@ export default function AuthPage() {
                 </div>
                 
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    loginForm.handleSubmit(onLoginSubmit)(e);
+                  }} className="space-y-4">
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -257,7 +260,10 @@ export default function AuthPage() {
                 </div>
                 
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    registerForm.handleSubmit(onRegisterSubmit)(e);
+                  }} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={registerForm.control}
