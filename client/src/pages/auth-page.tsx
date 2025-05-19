@@ -35,6 +35,7 @@ const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
   role: z.enum(["patient", "clinician"]),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 const registerSchema = z.object({
@@ -44,6 +45,7 @@ const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   role: z.enum(["patient", "clinician"]),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 export default function AuthPage() {
@@ -54,7 +56,14 @@ export default function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // Redirect to the appropriate dashboard based on user role
+      if (user.role === "patient") {
+        navigate("/patient-dashboard");
+      } else if (user.role === "clinician") {
+        navigate("/clinician-dashboard");
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
@@ -64,6 +73,7 @@ export default function AuthPage() {
       username: "",
       password: "",
       role: "patient" as UserRole,
+      rememberMe: false,
     },
   });
 
@@ -76,6 +86,7 @@ export default function AuthPage() {
       firstName: "",
       lastName: "",
       role: "patient" as UserRole,
+      rememberMe: false,
     },
   });
 
