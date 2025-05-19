@@ -345,7 +345,8 @@ export class MemStorage implements IStorage {
     const patient = {
       id: this.userIdCounter++,
       username: "sarah.patient",
-      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      // Using different secure hashes for each user - DO NOT add plaintext comments
+      password: "$2b$10$L9TkHyOvMFGJPe4P.OeZ8OM5FsWfvmW1QWab12hzD0kl/G1.seM5W",
       email: "sarah@example.com",
       firstName: "Sarah",
       lastName: "Johnson",
@@ -357,7 +358,7 @@ export class MemStorage implements IStorage {
     const clinician = {
       id: this.userIdCounter++,
       username: "dr.smith",
-      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      password: "$2b$10$HQBpMvZZ4ThLmGIGt7NDWu7.QVPbFfEMyCJTF5BQvkJO.mmWV3Yl.",
       email: "dr.smith@hospital.com",
       firstName: "Jane",
       lastName: "Smith",
@@ -369,7 +370,7 @@ export class MemStorage implements IStorage {
     const patient2 = {
       id: this.userIdCounter++,
       username: "emily.williams",
-      password: "$2b$10$dGmM5Bj9CWuGYdXAcnMDzuFnpG4y91Rj5VYv5NbzQizH9r6NZ7WJG", // 'password123'
+      password: "$2b$10$dX4j.RCc7XHm6TxuOiWk8.upLQa0W9.yfPX1RbTL6PV4WHJYkZ8zK",
       email: "emily@example.com",
       firstName: "Emily",
       lastName: "Williams",
