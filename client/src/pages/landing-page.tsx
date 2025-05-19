@@ -26,7 +26,7 @@ import {
   Globe,
   LucideIcon
 } from "lucide-react";
-import logoImage from "../assets/new-logo.png";
+import logoImage from "../assets/custom-logo.svg";
 
 interface FeatureCardProps {
   icon: LucideIcon;

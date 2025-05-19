@@ -29,7 +29,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { UserRole } from "@/types";
-import logoImage from "../assets/new-logo.png";
+import logoImage from "../assets/custom-logo.svg";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
