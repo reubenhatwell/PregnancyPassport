@@ -29,7 +29,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { UserRole } from "@/types";
-import logoImage from "../assets/new-logo.jpg";
+import logoImage from "../assets/new-logo.png";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -95,8 +95,8 @@ export default function AuthPage() {
         <Card className="w-full max-w-md shadow-xl border-0">
           <CardHeader className="space-y-1 text-center bg-gradient-to-r from-primary-100 to-pink-100 rounded-t-lg py-6">
             <div className="flex justify-center mb-4">
-              <div className="rounded-full bg-pink-50 p-4 shadow-sm border border-pink-100">
-                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-16 w-auto opacity-90" />
+              <div className="shadow-md">
+                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />
               </div>
             </div>
             <CardTitle className="text-3xl font-heading text-primary-700">
