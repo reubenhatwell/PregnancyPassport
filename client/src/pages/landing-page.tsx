@@ -239,7 +239,7 @@ export default function LandingPage() {
       
       <main id="main-content" className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary-50 to-pink-50 py-12 md:py-20">
+        <section className="bg-gradient-to-r from-pink-50 to-rose-50 py-12 md:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-center md:justify-between">
               <div className="md:max-w-2xl mb-8 md:mb-0">

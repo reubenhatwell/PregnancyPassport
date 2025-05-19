@@ -90,10 +90,10 @@ export default function AuthPage() {
   const isPending = loginMutation.isPending || registerMutation.isPending || isLoading;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-600 to-primary-800">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700">
       <div className="flex-1 flex items-center justify-center p-4 md:p-8">
         <Card className="w-full max-w-md shadow-xl border-0">
-          <CardHeader className="space-y-1 text-center bg-gradient-to-r from-primary-100 to-pink-100 rounded-t-lg py-6">
+          <CardHeader className="space-y-1 text-center bg-gradient-to-r from-pink-50 to-pink-100 rounded-t-lg py-6">
             <div className="flex justify-center mb-4">
               <div className="shadow-md">
                 <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />
