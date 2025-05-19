@@ -200,16 +200,26 @@ export default function AuthPage() {
                     />
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          id="remember-me" 
-                          className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                        />
-                        <Label htmlFor="remember-me" className="text-sm text-gray-700">
-                          Remember me
-                        </Label>
-                      </div>
+                      <FormField
+                        control={loginForm.control}
+                        name="rememberMe"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <input 
+                                type="checkbox" 
+                                checked={field.value}
+                                onChange={field.onChange}
+                                id="login-remember-me" 
+                                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                              />
+                            </FormControl>
+                            <Label htmlFor="login-remember-me" className="text-sm text-gray-700">
+                              Remember me
+                            </Label>
+                          </FormItem>
+                        )}
+                      />
                       <Button variant="link" className="p-0 h-auto text-primary-600 hover:text-primary-500">
                         Forgot password?
                       </Button>
@@ -369,6 +379,27 @@ export default function AuthPage() {
                         <span className="text-xs text-gray-700">Health Records</span>
                       </div>
                     </div>
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="rememberMe"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 mb-4">
+                          <FormControl>
+                            <input 
+                              type="checkbox" 
+                              checked={field.value}
+                              onChange={field.onChange}
+                              id="register-remember-me" 
+                              className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                            />
+                          </FormControl>
+                          <Label htmlFor="register-remember-me" className="text-sm text-gray-700">
+                            Remember me
+                          </Label>
+                        </FormItem>
+                      )}
+                    />
                     
                     <Button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white" disabled={isPending}>
                       {isPending ? (

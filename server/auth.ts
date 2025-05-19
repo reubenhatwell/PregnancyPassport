@@ -30,16 +30,22 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const sessionSettings: session.SessionOptions = {
+  // Default session settings
+  const getSessionSettings = (rememberMe = false): session.SessionOptions => ({
     secret: process.env.SESSION_SECRET || "digital-pregnancy-passport-secret",
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      // Set longer session timeout if rememberMe is true
+      maxAge: rememberMe 
+        ? 1000 * 60 * 60 * 24 * 30  // 30 days for "remember me"
+        : 1000 * 60 * 60 * 24 * 1,   // 1 day for regular sessions
     },
-  };
+  });
+  
+  const sessionSettings = getSessionSettings();
 
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));
@@ -77,9 +83,14 @@ export function setupAuth(app: Express) {
       const registerSchema = insertUserSchema.extend({
         password: z.string().min(8, "Password must be at least 8 characters"),
         email: z.string().email("Invalid email address"),
+        rememberMe: z.boolean().optional().default(false),
       });
 
       const userData = registerSchema.parse(req.body);
+      const rememberMe = userData.rememberMe === true;
+      
+      // Remove the rememberMe field before creating user
+      const { rememberMe: _, ...userDataToSave } = userData;
 
       // Check if username or email already exists
       const existingUsername = await storage.getUserByUsername(userData.username);
@@ -97,9 +108,16 @@ export function setupAuth(app: Express) {
 
       // Create user
       const user = await storage.createUser({
-        ...userData,
+        ...userDataToSave,
         password: hashedPassword,
       });
+
+      // Set the session cookie expiration based on rememberMe
+      if (rememberMe) {
+        req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30; // 30 days
+      } else {
+        req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 1; // 1 day
+      }
 
       // Automatically login the new user
       req.login(user, (err) => {
@@ -116,10 +134,28 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    // Don't send password back to client
-    const { password, ...userWithoutPassword } = req.user;
-    res.status(200).json(userWithoutPassword);
+  app.post("/api/login", (req, res, next) => {
+    // Handle the remember me flag
+    const rememberMe = req.body.rememberMe === true;
+    
+    // Set the session cookie expiration based on the rememberMe flag
+    if (rememberMe) {
+      req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30; // 30 days
+    } else {
+      req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 1; // 1 day
+    }
+    
+    passport.authenticate("local", (err, user, info) => {
+      if (err) return next(err);
+      if (!user) return res.status(401).json({ message: "Invalid username or password" });
+      
+      req.login(user, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        // Don't send password back to client
+        const { password, ...userWithoutPassword } = user;
+        return res.status(200).json(userWithoutPassword);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
