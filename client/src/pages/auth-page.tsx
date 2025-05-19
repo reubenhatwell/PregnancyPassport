@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,7 +11,23 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart, User, Loader2 } from "lucide-react";
+import { 
+  Heart, 
+  User, 
+  Loader2, 
+  ShieldCheck, 
+  BookOpen, 
+  Calendar, 
+  MessageSquare, 
+  FileText, 
+  ChevronRight, 
+  ExternalLink,
+  Menu,
+  X,
+  Baby,
+  HelpCircle,
+  BarChart3
+} from "lucide-react";
 import { UserRole } from "@/types";
 
 const loginSchema = z.object({
