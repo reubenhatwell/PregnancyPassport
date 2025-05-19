@@ -37,6 +37,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllPatients(): Promise<User[]>; // Get all users with role="patient"
   
   // Pregnancy operations
   getPregnancy(id: number): Promise<Pregnancy | undefined>;
@@ -49,6 +50,7 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   updateAppointment(id: number, appointment: Partial<Appointment>): Promise<Appointment | undefined>;
   deleteAppointment(id: number): Promise<boolean>;
+  getAllAppointments(): Promise<Appointment[]>; // Get all appointments for clinician view
   
   // Vital Stats operations
   getVitalStat(id: number): Promise<VitalStat | undefined>;
@@ -59,6 +61,7 @@ export interface IStorage {
   getTestResult(id: number): Promise<TestResult | undefined>;
   getTestResultsByPregnancyId(pregnancyId: number): Promise<TestResult[]>;
   createTestResult(testResult: InsertTestResult): Promise<TestResult>;
+  getAllTestResults(): Promise<TestResult[]>; // Get all test results for clinician view
   
   // Scan operations
   getScan(id: number): Promise<Scan | undefined>;
@@ -337,6 +340,19 @@ export class MemStorage implements IStorage {
     const module: EducationModule = { ...insertModule, id };
     this.educationModules.set(id, module);
     return module;
+  }
+  
+  // Clinician methods
+  async getAllPatients(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(user => user.role === "patient");
+  }
+  
+  async getAllAppointments(): Promise<Appointment[]> {
+    return Array.from(this.appointments.values());
+  }
+  
+  async getAllTestResults(): Promise<TestResult[]> {
+    return Array.from(this.testResults.values());
   }
   
   // Initialize methods for demo data
