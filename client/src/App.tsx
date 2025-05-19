@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 
 import Dashboard from "@/pages/dashboard";
 import AuthPage from "@/pages/auth-page";
+import LandingPage from "@/pages/landing-page";
 import Appointments from "@/pages/appointments";
 import HealthTracking from "@/pages/health-tracking";
 import ScansImages from "@/pages/scans-images";
@@ -22,7 +23,9 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={Dashboard} />
+      <Route path="/" component={LandingPage} />
+      <Route path="/auth-page" component={AuthPage} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/appointments" component={Appointments} />
       <ProtectedRoute path="/health-tracking" component={HealthTracking} />
       <ProtectedRoute path="/scans-images" component={ScansImages} />
@@ -32,7 +35,6 @@ function Router() {
       <ProtectedRoute path="/education" component={Education} />
       <ProtectedRoute path="/settings" component={Settings} />
       <ProtectedRoute path="/clinician" component={ClinicianDashboard} />
-      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
