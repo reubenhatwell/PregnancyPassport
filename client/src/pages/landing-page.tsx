@@ -249,16 +249,16 @@ export default function LandingPage() {
                 
                 <div className="flex space-x-3 mb-8">
                   <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    <span className="text-gray-700">NSW Health Endorsed</span>
-                  </div>
-                  <div className="flex items-center">
                     <ShieldCheck className="h-5 w-5 text-green-500 mr-2" />
                     <span className="text-gray-700">Secure &amp; Private</span>
                   </div>
                   <div className="flex items-center">
                     <Globe className="h-5 w-5 text-green-500 mr-2" />
                     <span className="text-gray-700">24/7 Access</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span className="text-gray-700">Easy to Use</span>
                   </div>
                 </div>
                 
@@ -687,28 +687,24 @@ export default function LandingPage() {
         <section className="py-16 bg-gradient-to-r from-primary-500 to-pink-600 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Trusted by Thousands Across Australia</h2>
+              <h2 className="text-3xl font-bold mb-4">Digital Pregnancy Management</h2>
               <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                Join the growing community of families and healthcare providers using the Digital Pregnancy Passport.
+                A comprehensive platform designed specifically for pregnancy health management.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-12">
               <div>
-                <div className="text-4xl font-bold mb-2">12,500+</div>
-                <div className="text-lg opacity-90">Active Users</div>
+                <div className="text-4xl font-bold mb-2">Secure</div>
+                <div className="text-lg opacity-90">Privacy-First Platform</div>
               </div>
               <div>
-                <div className="text-4xl font-bold mb-2">350+</div>
-                <div className="text-lg opacity-90">Healthcare Providers</div>
+                <div className="text-4xl font-bold mb-2">Comprehensive</div>
+                <div className="text-lg opacity-90">End-to-End Pregnancy Care</div>
               </div>
               <div>
-                <div className="text-4xl font-bold mb-2">98%</div>
-                <div className="text-lg opacity-90">User Satisfaction</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold mb-2">4.8/5</div>
-                <div className="text-lg opacity-90">Average Rating</div>
+                <div className="text-4xl font-bold mb-2">Accessible</div>
+                <div className="text-lg opacity-90">Available Anytime, Anywhere</div>
               </div>
             </div>
             
