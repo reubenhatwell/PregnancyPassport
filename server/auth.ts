@@ -7,7 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
-import { createFirebaseUser, findFirebaseUserByEmail } from "./firebase-service";
+import { createFirebaseUser, findFirebaseUserByEmail, updateFirebaseUser } from "./firebase-service";
 
 declare global {
   namespace Express {
@@ -216,6 +216,45 @@ export function setupAuth(app: Express) {
     } catch (error) {
       console.error("Error checking email:", error);
       res.status(500).json({ message: "An error occurred while checking email" });
+    }
+  });
+  
+  // Password reset endpoint - used after a user clicks the reset link in their email
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { email, newPassword, oobCode } = req.body;
+      
+      if (!email || !newPassword) {
+        return res.status(400).json({ message: "Email and new password are required" });
+      }
+      
+      // Check if user exists in our database
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        // Don't reveal that the email doesn't exist
+        return res.status(400).json({ message: "Invalid or expired password reset link" });
+      }
+      
+      // 1. Update password in our database
+      const hashedPassword = await hashPassword(newPassword);
+      await storage.updateUserPassword(user.id, hashedPassword);
+      
+      // 2. Update password in Firebase
+      try {
+        const firebaseUser = await findFirebaseUserByEmail(email);
+        if (firebaseUser) {
+          await updateFirebaseUser(firebaseUser.uid, { password: newPassword });
+        }
+      } catch (firebaseError) {
+        console.error("Error updating Firebase password:", firebaseError);
+        // Continue anyway as our main database is updated
+      }
+      
+      res.status(200).json({ message: "Password has been reset successfully. You can now log in with your new password." });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "An error occurred while resetting your password" });
     }
   });
 }

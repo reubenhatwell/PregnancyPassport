@@ -37,6 +37,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<boolean>;
   getAllPatients(): Promise<User[]>; // Get all users with role="patient"
   
   // Pregnancy operations
@@ -172,6 +173,15 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
+  }
+  
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    
+    user.password = hashedPassword;
+    this.users.set(userId, user);
+    return true;
   }
 
   // Pregnancy Operations

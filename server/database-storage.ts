@@ -68,6 +68,19 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
+  
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<boolean> {
+    if (!db) return false;
+    try {
+      await db.update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, userId));
+      return true;
+    } catch (error) {
+      console.error("Error updating user password:", error);
+      return false;
+    }
+  }
 
   // Pregnancy operations
   async getPregnancy(id: number): Promise<Pregnancy | undefined> {
