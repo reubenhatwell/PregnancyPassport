@@ -128,7 +128,15 @@ export default function AuthPage() {
     
     try {
       // Use Firebase to send password reset email
+      console.log('Beginning password reset process');
       const { sendPasswordReset } = await import('@/lib/firebase');
+      
+      // For testing purposes, display a toast to show we're trying to send the email
+      toast({
+        title: "Processing",
+        description: "Sending password reset email...",
+      });
+      
       const success = await sendPasswordReset(resetEmail);
       
       if (success) {
@@ -139,8 +147,8 @@ export default function AuthPage() {
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to send password reset email. The email may not be registered in our system.",
+          title: "Unable to send email",
+          description: "Please check if the email address is correct or try again later.",
           variant: "destructive",
         });
       }
