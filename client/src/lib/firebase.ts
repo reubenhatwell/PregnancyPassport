@@ -20,8 +20,22 @@ export const sendPasswordReset = async (email: string): Promise<boolean> => {
     // Log the attempt for debugging
     console.log("Attempting to send password reset email to:", email);
     
+    // Make a request to our server to check if email exists
+    await fetch('/api/check-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    
     // Use firebase auth to send password reset email
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, {
+      // Use the action code settings to specify the URL to redirect to after password reset
+      url: window.location.origin + '/auth-page?mode=resetPassword&email=' + encodeURIComponent(email),
+      handleCodeInApp: true,
+    });
+    
     console.log("Password reset email sent successfully");
     return true;
   } catch (error: any) {

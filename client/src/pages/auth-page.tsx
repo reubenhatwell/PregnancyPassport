@@ -61,10 +61,28 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
   const [location, navigate] = useLocation();
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
+  const [showPasswordResetConfirmDialog, setShowPasswordResetConfirmDialog] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const { user, loginMutation, registerMutation, isLoading } = useAuth();
+
+  // Check URL parameters for password reset
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const email = params.get('email');
+    const oobCode = params.get('oobCode');
+    
+    if (mode === 'resetPassword' && email && oobCode) {
+      setShowPasswordResetConfirmDialog(true);
+      setResetEmail(email);
+      setResetCode(oobCode);
+    }
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -182,6 +200,77 @@ export default function AuthPage() {
     }
   };
 
+  // Handle the password reset confirmation
+  const handlePasswordReset = async () => {
+    // Validation
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Your password must be at least 8 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure both passwords match",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsResettingPassword(true);
+    
+    try {
+      // Call our server API to update the password
+      const response = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: resetEmail,
+          newPassword,
+          oobCode: resetCode
+        }),
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Password reset successful",
+          description: "You can now log in with your new password"
+        });
+        
+        // Close the dialog and reset fields
+        setShowPasswordResetConfirmDialog(false);
+        setNewPassword("");
+        setConfirmPassword("");
+        setResetCode("");
+        
+        // Pre-fill the login form with the email
+        loginForm.setValue("username", resetEmail);
+        setActiveTab("login");
+      } else {
+        const data = await response.json();
+        toast({
+          title: "Password reset failed",
+          description: data.message || "There was an error resetting your password",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700">
       {/* Forgot Password Dialog */}
@@ -248,6 +337,60 @@ export default function AuthPage() {
               </Button>
             </DialogFooter>
           )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Password Reset Confirmation Dialog */}
+      <Dialog open={showPasswordResetConfirmDialog} onOpenChange={setShowPasswordResetConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set a new password</DialogTitle>
+            <DialogDescription>
+              Enter your new password below to complete the password reset process.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="newPassword" className="text-gray-700">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="border-gray-300"
+              />
+              <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="border-gray-300"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              onClick={handlePasswordReset} 
+              disabled={isResettingPassword}
+              className="bg-gradient-to-r from-primary-500 to-primary-600"
+            >
+              {isResettingPassword ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resetting password...
+                </>
+              ) : "Reset Password"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
