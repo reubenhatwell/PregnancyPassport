@@ -272,7 +272,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700 overflow-auto px-4 py-8">
       {/* Forgot Password Dialog */}
       <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
         <DialogContent className="sm:max-w-md">
@@ -394,8 +394,8 @@ export default function AuthPage() {
         </DialogContent>
       </Dialog>
       
-      <div className="flex-1 flex items-center justify-center p-4 md:p-8">
-        <Card className="w-full max-w-md shadow-xl border-0">
+      <div className="flex-1 flex items-center justify-center p-2 md:p-8">
+        <Card className="w-full max-w-md shadow-xl border-0 max-h-[90vh] md:max-h-none overflow-y-auto">
           <CardHeader className="space-y-1 text-center bg-gradient-to-r from-pink-50 to-pink-100 rounded-t-lg py-6">
             <div className="flex justify-center mb-4">
               <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />

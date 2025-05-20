@@ -2,6 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Responsive calendar styles */
+.responsive-calendar .rbc-calendar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.responsive-calendar .rbc-toolbar {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.responsive-calendar .rbc-toolbar-label {
+  margin: 8px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+@media (min-width: 768px) {
+  .responsive-calendar .rbc-toolbar {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .responsive-calendar .rbc-toolbar-label {
+    margin: 0 10px;
+  }
+}
+
+/* Make calendar events more visible on mobile */
+.responsive-calendar .rbc-event {
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .responsive-calendar .rbc-agenda-view table.rbc-agenda-table {
+    font-size: 0.8rem;
+  }
+  
+  .responsive-calendar .rbc-header {
+    padding: 5px 2px;
+    font-size: 0.8rem;
+  }
+  
+  .responsive-calendar .rbc-btn-group {
+    margin-bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .responsive-calendar .rbc-btn-group button {
+    padding: 5px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Error and empty state styling */
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #B91C1C;
+}
+
+.empty-state-container {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  background-color: #F3F4F6;
+  border: 1px solid #E5E7EB;
+}
+
 :root {
       --background: 214 32% 98%;
 --foreground: 222 47% 11%;

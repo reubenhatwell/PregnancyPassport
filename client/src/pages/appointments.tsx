@@ -303,7 +303,34 @@ export default function Appointments() {
               <TabsContent value="calendar" className="mt-6">
                 {isLoading ? (
                   <div className="text-center py-8">
-                    <p>Loading calendar...</p>
+                    <div className="flex flex-col items-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
+                      <p className="text-gray-600">Loading your appointments...</p>
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="error-container">
+                    <div className="flex flex-col items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-lg font-medium mb-2">Unable to load appointments</h3>
+                      <p className="text-sm">Please try again later or contact support if the problem persists.</p>
+                    </div>
+                  </div>
+                ) : appointments?.length === 0 ? (
+                  <div className="empty-state-container">
+                    <div className="flex flex-col items-center">
+                      <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No appointments yet</h3>
+                      <p className="text-sm mb-4">You don't have any scheduled appointments.</p>
+                      {isClinician && (
+                        <Button onClick={() => setIsAddDialogOpen(true)} variant="outline">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Schedule an appointment
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <Card className="overflow-hidden">
@@ -319,7 +346,9 @@ export default function Appointments() {
                           selectable={isClinician}
                           date={calendarDate}
                           onNavigate={setCalendarDate}
-                          style={{ height: 700 }}
+                          style={{ height: "calc(100vh - 250px)", minHeight: "500px" }}
+                          views={['month', 'week', 'day']}
+                          className="responsive-calendar"
                           eventPropGetter={(event) => {
                             const isPast = new Date(event.start) < new Date();
                             const appointment = event.resource;
