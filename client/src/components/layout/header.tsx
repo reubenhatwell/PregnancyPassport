@@ -39,49 +39,52 @@ export default function Header({ userName, gestationWeeks }: HeaderProps) {
     .toUpperCase();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-primary/5 shadow-md border-b border-primary/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <div className="text-primary-500 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+              <div className="text-primary mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" strokeWidth="0" className="h-7 w-7">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
-              <span className="font-heading font-bold text-xl text-primary-600">Digital Pregnancy Passport</span>
+              <span className="font-heading font-bold text-xl text-primary">Digital Pregnancy Passport</span>
             </div>
           </div>
           <div className="flex items-center">
             {gestationWeeks && (
-              <span className="text-sm text-gray-700 hidden md:inline-block mr-4">{gestationWeeks}</span>
+              <div className="hidden md:flex items-center mr-5 px-3 py-1 bg-secondary/30 text-secondary-foreground rounded-full">
+                <span className="text-sm font-medium">{gestationWeeks}</span>
+              </div>
             )}
-            <span className="inline-flex rounded-md shadow-sm">
+            <span className="inline-flex">
               <button 
                 type="button" 
-                className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="bg-primary/10 p-2 rounded-full text-primary hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Notifications"
               >
-                <Bell className="h-6 w-6" />
+                <Bell className="h-5 w-5" />
               </button>
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="ml-3 flex items-center max-w-xs bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                  <Avatar className="h-8 w-8">
+                <button className="ml-3 flex items-center px-2 py-1 rounded-full bg-secondary/20 hover:bg-secondary/30 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  <Avatar className="h-8 w-8 border-2 border-primary/20">
                     <AvatarImage src="" />
-                    <AvatarFallback>{userInitials}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">{userInitials}</AvatarFallback>
                   </Avatar>
-                  <span className="ml-2 text-sm font-medium text-gray-700 hidden md:block">{userName}</span>
-                  <ChevronDown className="text-gray-400 ml-1 h-4 w-4" />
+                  <span className="ml-2 text-sm font-medium text-foreground hidden md:block">{userName}</span>
+                  <ChevronDown className="text-primary/70 ml-1 h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>{userName}</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-primary/90">{userName}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
+                <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10" onClick={() => window.location.href = "/settings"}>
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10" onClick={handleLogout}>
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
