@@ -27,7 +27,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import logoImage from "../assets/image_1747633957966.png";
-import motherBabyImage from "@assets/image_1747633148337.png";
+import motherBabyImage from "@assets/IMG_5254_1747631963871.jpg";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -290,7 +290,7 @@ export default function LandingPage() {
                 <img 
                   src={motherBabyImage}
                   alt="Mother and baby logo" 
-                  className="max-w-full h-auto object-contain" 
+                  className="rounded-lg shadow-md max-w-full h-auto object-contain bg-white p-6" 
                   style={{maxHeight: "280px", width: "auto"}}
                 />
               </div>
