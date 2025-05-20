@@ -443,9 +443,11 @@ export default function Appointments() {
                         <h2 className="text-lg font-semibold text-gray-700 mb-3">{month}</h2>
                         <div className="space-y-3">
                           {groupedAppointments[month].map(appointment => {
-                            // Color based on date (past/future)
-                            const isPast = new Date(appointment.dateTime) < new Date();
-                            const colorClass = isPast ? "bg-gray-400" : "bg-primary";
+                            // Color based on appointment type
+                            let colorClass = "bg-primary";
+                            if (new Date(appointment.dateTime) < new Date()) {
+                              colorClass = "bg-gray-400";
+                            }
                             
                             return (
                               <Card key={appointment.id} className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
@@ -456,73 +458,81 @@ export default function Appointments() {
                                       <div className="flex items-center justify-between">
                                         <h3 className="font-medium text-gray-900">{appointment.title}</h3>
                                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${colorClass} text-white`}>
-                                          {isPast ? "Past" : "Upcoming"}
+                                          {new Date(appointment.dateTime) < new Date() ? "Past" : "Upcoming"}
                                         </span>
                                       </div>
-                                    <div className="flex items-center text-sm text-gray-600 mt-1">
-                                      <CalendarClock className="h-4 w-4 mr-1 flex-shrink-0" />
-                                      <span>{formatDateTime(appointment.dateTime)} ({appointment.duration} mins)</span>
-                                    </div>
-                                    {appointment.location && (
+                                      
                                       <div className="flex items-center text-sm text-gray-600 mt-1">
-                                        <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                                        <span>{appointment.location}</span>
+                                        <CalendarClock className="h-4 w-4 mr-1 flex-shrink-0" />
+                                        <span>{formatDateTime(appointment.dateTime)} ({appointment.duration} mins)</span>
                                       </div>
-                                    )}
-                                    {appointment.clinicianName && (
-                                      <div className="text-sm text-gray-600 mt-1 ml-5">
-                                        With {appointment.clinicianName}
-                                      </div>
-                                    )}
-                                    {appointment.description && (
-                                      <p className="text-sm text-gray-600 mt-2">{appointment.description}</p>
-                                    )}
+                                      
+                                      {appointment.location && (
+                                        <div className="flex items-center text-sm text-gray-600 mt-1">
+                                          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                                          <span>{appointment.location}</span>
+                                        </div>
+                                      )}
+                                      
+                                      {appointment.clinicianName && (
+                                        <div className="text-sm text-gray-600 mt-1 ml-5">
+                                          With {appointment.clinicianName}
+                                        </div>
+                                      )}
+                                      
+                                      {appointment.description && (
+                                        <p className="text-sm text-gray-600 mt-2">{appointment.description}</p>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex mt-3 md:mt-0 space-x-2">
+                                      {isClinician && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline" 
+                                          className="h-8"
+                                          onClick={() => {
+                                            setSelectedAppointment(appointment);
+                                            setIsEditDialogOpen(true);
+                                          }}
+                                        >
+                                          <Edit className="h-3.5 w-3.5 mr-1" />
+                                          Edit
+                                        </Button>
+                                      )}
+                                      
+                                      {appointment.location && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline" 
+                                          className="h-8"
+                                          onClick={() => {
+                                            if (appointment.location) {
+                                              window.open(`https://maps.google.com?q=${encodeURIComponent(appointment.location)}`, '_blank');
+                                            }
+                                          }}
+                                        >
+                                          <Map className="h-3.5 w-3.5 mr-1" />
+                                          Directions
+                                        </Button>
+                                      )}
+                                      
+                                      {isClinician && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline" 
+                                          className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                          onClick={() => deleteAppointmentMutation.mutate(appointment.id)}
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="flex mt-3 md:mt-0 space-x-2">
-                                    {isClinician && (
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline" 
-                                        className="h-8"
-                                        onClick={() => {
-                                          setSelectedAppointment(appointment);
-                                          setIsEditDialogOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-3.5 w-3.5 mr-1" />
-                                        Edit
-                                      </Button>
-                                    )}
-                                    {appointment.location && (
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline" 
-                                        className="h-8"
-                                        onClick={() => {
-                                          if (appointment.location) {
-                                            window.open(`https://maps.google.com?q=${encodeURIComponent(appointment.location)}`, '_blank');
-                                          }
-                                        }}
-                                      >
-                                        <Map className="h-3.5 w-3.5 mr-1" />
-                                        Directions
-                                      </Button>
-                                    )}
-                                    {isClinician && (
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline" 
-                                        className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                        onClick={() => deleteAppointmentMutation.mutate(appointment.id)}
-                                      >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
