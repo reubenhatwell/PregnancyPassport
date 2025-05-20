@@ -507,6 +507,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create HTTP server
+  // Admin route for account cleanup (delete all accounts)
+  // CAUTION: This endpoint will delete all user accounts and associated data
+  app.post("/api/admin/delete-all-accounts", async (req, res) => {
+    try {
+      // In a production system, this should be secured with admin authentication
+      // For development purposes, we'll allow it without additional auth
+      const { deleteAllAccounts } = await import("./account-cleanup");
+      const result = await deleteAllAccounts();
+      res.json(result);
+    } catch (error) {
+      console.error("Error in delete-all-accounts endpoint:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete accounts: " + (error as Error).message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   return httpServer;

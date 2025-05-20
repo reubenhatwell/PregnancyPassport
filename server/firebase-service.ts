@@ -72,3 +72,19 @@ export const findFirebaseUserByEmail = async (email: string) => {
     return null;
   }
 };
+
+/**
+ * Delete a Firebase user by their user ID
+ * @param uid Firebase user ID
+ * @returns true if successful, false otherwise
+ */
+export const deleteFirebaseUser = async (uid: string) => {
+  try {
+    await auth.deleteUser(uid);
+    console.log('Successfully deleted Firebase user:', uid);
+    return true;
+  } catch (error) {
+    console.error('Error deleting Firebase user:', error);
+    return false;
+  }
+};
