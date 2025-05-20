@@ -290,7 +290,7 @@ export default function LandingPage() {
                 <img 
                   src={motherBabyImage}
                   alt="Mother and baby logo" 
-                  className="rounded-lg shadow-md max-w-full h-auto object-contain bg-white p-6" 
+                  className="max-w-full h-auto object-contain" 
                   style={{maxHeight: "280px", width: "auto"}}
                 />
               </div>
