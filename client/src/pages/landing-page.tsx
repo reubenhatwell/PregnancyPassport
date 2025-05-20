@@ -27,7 +27,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import logoImage from "../assets/image_1747633957966.png";
-import motherBabyImage from "@assets/IMG_5254_1747631963871.jpg";
+import motherBabyImage from "@assets/image_1747633148337.png";
 
 interface FeatureCardProps {
   icon: LucideIcon;
