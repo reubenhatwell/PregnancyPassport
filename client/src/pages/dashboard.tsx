@@ -80,19 +80,19 @@ export default function Dashboard() {
         <Sidebar activePage="dashboard" userRole={user?.role || "patient"} />
         
         <div className="flex-1 overflow-auto focus:outline-none">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="space-y-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-8">
               {/* Welcome Section */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center justify-between">
+              <div className="bg-gradient-to-r from-primary/20 to-secondary/30 rounded-xl shadow-md p-8 border border-primary/10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <h1 className="text-2xl font-heading font-bold text-gray-900">
+                    <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
                       Welcome back, {user?.firstName || ""}
                     </h1>
-                    <p className="text-gray-600 mt-1">Your pregnancy journey at a glance</p>
+                    <p className="text-foreground/80 mt-2 text-lg">Your pregnancy journey at a glance</p>
                   </div>
-                  <div className="hidden sm:block">
-                    <Button className="inline-flex items-center">
+                  <div>
+                    <Button className="inline-flex items-center bg-primary hover:bg-primary/90 transition-colors shadow-sm">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Information
                     </Button>

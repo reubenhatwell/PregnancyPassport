@@ -89,25 +89,27 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
 
   return (
     <div className="hidden md:flex md:flex-shrink-0">
-      <div className="flex flex-col w-64">
-        <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
-          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
+      <div className="flex flex-col w-72">
+        <div className="flex flex-col h-0 flex-1 border-r border-primary/20 bg-sidebar">
+          <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
+            <nav className="mt-2 flex-1 px-3 space-y-2">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.path}
                   className={cn(
-                    "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                    "group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-150 ease-in-out",
                     activePage === item.name
-                      ? "bg-primary-50 text-primary-600"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-sidebar-foreground hover:bg-primary/10 hover:text-primary"
                   )}
                 >
                   <item.icon
                     className={cn(
                       "mr-3 h-5 w-5",
-                      activePage === item.name ? "text-primary-500" : "text-gray-400 group-hover:text-gray-500"
+                      activePage === item.name 
+                        ? "text-primary-foreground" 
+                        : "text-sidebar-foreground/60 group-hover:text-primary"
                     )}
                   />
                   {item.label}
@@ -115,35 +117,39 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
               ))}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <div className="flex items-center w-full">
+          <div className="flex-shrink-0 border-t border-primary/20 p-4">
+            <div className="flex items-center w-full bg-primary/10 p-3 rounded-lg">
               <div className="flex-shrink-0">
                 <span className={cn(
                   "inline-flex items-center justify-center h-10 w-10 rounded-full",
-                  userRole === "patient" ? "bg-secondary-100" : "bg-primary-100"
+                  userRole === "patient" 
+                    ? "bg-secondary text-secondary-foreground" 
+                    : "bg-primary text-primary-foreground"
                 )}>
                   {userRole === "patient" ? (
-                    <UserRound className="h-6 w-6 text-secondary-600" />
+                    <UserRound className="h-5 w-5" />
                   ) : (
-                    <User className="h-6 w-6 text-primary-600" />
+                    <User className="h-5 w-5" />
                   )}
                 </span>
               </div>
               <div className="ml-3 w-full">
-                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                <p className="text-sm font-medium text-foreground">
                   {userRole === "patient" ? "Patient View" : "Clinician View"}
                 </p>
-                <div className="mt-1 flex justify-between">
+                <div className="mt-2 flex justify-between items-center">
                   <Button
-                    variant="link"
-                    className="text-xs font-medium text-primary-600 hover:text-primary-500 p-0 h-auto"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs font-medium py-1 px-2 h-auto bg-secondary/20 hover:bg-secondary/30 text-secondary-foreground rounded-md"
                     onClick={userRole === "patient" ? () => {} : () => {}}
                   >
-                    {userRole === "patient" ? "Switch to Clinician View" : "Switch to Patient View"}
+                    {userRole === "patient" ? "Switch View" : "Switch View"}
                   </Button>
                   <Button
-                    variant="link"
-                    className="text-xs font-medium text-red-600 hover:text-red-500 p-0 h-auto"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs font-medium py-1 px-2 h-auto bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-md"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-3 w-3 mr-1" />
