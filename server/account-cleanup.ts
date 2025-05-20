@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, sessions } from "@shared/schema";
+import { users, sessions, messages, pregnancies, appointments, vitalStats, testResults, scans, educationProgress } from "@shared/schema";
 import { findFirebaseUserByEmail, deleteFirebaseUser } from "./firebase-service";
 import { eq } from "drizzle-orm";
 
@@ -15,29 +15,62 @@ export async function deleteAllAccounts() {
     const allUsers = await db.select().from(users);
     console.log(`Found ${allUsers.length} users to delete`);
     
-    // 2. Delete users from Firebase (if they exist)
-    for (const user of allUsers) {
-      try {
-        if (user.email) {
-          const firebaseUser = await findFirebaseUserByEmail(user.email);
-          if (firebaseUser) {
-            await deleteFirebaseUser(firebaseUser.uid);
-            console.log(`Deleted Firebase user: ${user.email}`);
+    // 2. Delete users from Firebase (if Firebase is configured)
+    let firebaseEnabled = true;
+    try {
+      // Test if Firebase is properly configured
+      await findFirebaseUserByEmail("test@example.com");
+    } catch (error) {
+      console.log("Firebase authentication is not configured, skipping Firebase user deletion");
+      firebaseEnabled = false;
+    }
+    
+    if (firebaseEnabled) {
+      for (const user of allUsers) {
+        try {
+          if (user.email) {
+            const firebaseUser = await findFirebaseUserByEmail(user.email);
+            if (firebaseUser) {
+              await deleteFirebaseUser(firebaseUser.uid);
+              console.log(`Deleted Firebase user: ${user.email}`);
+            }
           }
+        } catch (error) {
+          console.error(`Error deleting Firebase user ${user.email}:`, error);
+          // Continue with other users even if one fails
         }
-      } catch (error) {
-        console.error(`Error deleting Firebase user ${user.email}:`, error);
-        // Continue with other users even if one fails
       }
     }
     
-    // 3. Delete all sessions
-    await db.delete(sessions);
-    console.log("Deleted all sessions");
+    // 3. Delete all related data first (foreign key constraints)
+    console.log("Deleting messages...");
+    await db.delete(messages);
     
-    // 4. Delete all users from our database
+    console.log("Deleting education progress...");
+    await db.delete(educationProgress);
+    
+    console.log("Deleting test results...");
+    await db.delete(testResults);
+    
+    console.log("Deleting scans...");
+    await db.delete(scans);
+    
+    console.log("Deleting vital stats...");
+    await db.delete(vitalStats);
+    
+    console.log("Deleting appointments...");
+    await db.delete(appointments);
+    
+    console.log("Deleting pregnancies...");
+    await db.delete(pregnancies);
+    
+    // 4. Delete all sessions
+    console.log("Deleting all sessions...");
+    await db.delete(sessions);
+    
+    // 5. Delete all users from our database
+    console.log("Deleting all users...");
     await db.delete(users);
-    console.log("Deleted all users from database");
     
     return { success: true, message: "All accounts and related data deleted successfully" };
   } catch (error) {
