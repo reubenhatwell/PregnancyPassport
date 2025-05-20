@@ -12,6 +12,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
+import { 
   Heart, 
   User, 
   Loader2, 
@@ -51,6 +60,10 @@ const registerSchema = z.object({
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
   const [location, navigate] = useLocation();
+  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const { user, loginMutation, registerMutation, isLoading } = useAuth();
 
   // Redirect if already logged in
@@ -100,8 +113,123 @@ export default function AuthPage() {
 
   const isPending = loginMutation.isPending || registerMutation.isPending || isLoading;
 
+  // Handle password reset request
+  const handleForgotPassword = async () => {
+    if (!resetEmail || !resetEmail.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+    
+    try {
+      const response = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setResetEmailSent(true);
+        toast({
+          title: "Password reset email sent",
+          description: "Please check your inbox for password reset instructions",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to send password reset email",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700">
+      {/* Forgot Password Dialog */}
+      <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset your password</DialogTitle>
+            <DialogDescription>
+              {resetEmailSent ? 
+                "We've sent password reset instructions to your email." :
+                "Enter your email address and we'll send you instructions to reset your password."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!resetEmailSent ? (
+            <>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className="text-gray-700">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="border-gray-300"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setShowForgotPasswordDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleForgotPassword} 
+                  disabled={isResettingPassword}
+                  className="bg-gradient-to-r from-primary-500 to-primary-600"
+                >
+                  {isResettingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : "Send reset instructions"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <DialogFooter>
+              <Button 
+                onClick={() => {
+                  setShowForgotPasswordDialog(false);
+                  setResetEmailSent(false);
+                  setResetEmail("");
+                }}
+                className="bg-gradient-to-r from-primary-500 to-primary-600"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+      
       <div className="flex-1 flex items-center justify-center p-4 md:p-8">
         <Card className="w-full max-w-md shadow-xl border-0">
           <CardHeader className="space-y-1 text-center bg-gradient-to-r from-pink-50 to-pink-100 rounded-t-lg py-6">
@@ -223,7 +351,11 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      <Button variant="link" className="p-0 h-auto text-primary-600 hover:text-primary-500">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-primary-600 hover:text-primary-500"
+                        onClick={() => setShowForgotPasswordDialog(true)}
+                      >
                         Forgot password?
                       </Button>
                     </div>
