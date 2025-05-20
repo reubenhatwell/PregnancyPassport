@@ -25,7 +25,7 @@ export default function MobileNavigation({ activePage }: MobileNavigationProps) 
     {
       name: "dashboard",
       label: "Dashboard",
-      path: "/",
+      path: "/dashboard",
       icon: LayoutDashboard,
     },
     {

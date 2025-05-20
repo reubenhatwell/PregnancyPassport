@@ -34,7 +34,7 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
     {
       name: "dashboard",
       label: "Dashboard",
-      path: "/",
+      path: "/dashboard",
       icon: LayoutDashboard,
     },
     {
