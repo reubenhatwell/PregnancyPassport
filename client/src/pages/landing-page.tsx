@@ -27,7 +27,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import logoImage from "../assets/image_1747633957966.png";
-import motherBabyImage from "@assets/IMG_5254_1747631963871.jpg";
+import pregnancyPassportImage from "../assets/generated/pregnancy-passport.svg";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -288,10 +288,10 @@ export default function LandingPage() {
               
               <div className="md:w-2/5 flex justify-center items-center">
                 <img 
-                  src={motherBabyImage}
-                  alt="Mother and baby logo" 
-                  className="rounded-lg shadow-md max-w-full h-auto object-contain bg-white p-6" 
-                  style={{maxHeight: "280px", width: "auto"}}
+                  src={pregnancyPassportImage}
+                  alt="Digital Pregnancy Passport" 
+                  className="rounded-lg shadow-md max-w-full h-auto object-contain p-4" 
+                  style={{maxHeight: "300px", width: "auto"}}
                 />
               </div>
             </div>

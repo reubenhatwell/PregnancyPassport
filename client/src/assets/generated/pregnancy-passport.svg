@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="400" height="280" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+  <!-- Passport background -->
+  <rect x="50" y="40" width="300" height="200" rx="10" ry="10" fill="#d5a6bd" />
+  <rect x="60" y="50" width="280" height="180" rx="5" ry="5" fill="#ffffff" />
+  
+  <!-- Passport title -->
+  <text x="200" y="80" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#d5567c">DIGITAL PREGNANCY PASSPORT</text>
+  
+  <!-- Dividing line -->
+  <line x1="80" y1="95" x2="320" y2="95" stroke="#d5567c" stroke-width="2" />
+  
+  <!-- Mother silhouette with heart -->
+  <g transform="translate(130, 150) scale(0.6)">
+    <path d="M80,10 C40,10 0,80 0,140 C0,190 30,230 80,230 C85,225 90,220 100,210 L100,130 C95,125 90,120 85,120 L85,100 C100,100 120,110 130,120 L130,210 C140,220 150,225 160,230 C210,230 240,190 240,140 C240,80 200,10 160,10 C130,10 120,30 120,30 C120,30 110,10 80,10 Z" fill="#d5567c" />
+    <circle cx="120" cy="160" r="20" fill="#ffffff" />
+  </g>
+  
+  <!-- Passport details -->
+  <text x="105" y="120" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333333">NAME:</text>
+  <line x1="150" y1="122" x2="320" y2="122" stroke="#777777" stroke-width="1" stroke-dasharray="2,2" />
+  
+  <text x="105" y="145" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333333">ID:</text>
+  <line x1="150" y1="147" x2="320" y2="147" stroke="#777777" stroke-width="1" stroke-dasharray="2,2" />
+  
+  <text x="270" y="180" font-family="Arial, sans-serif" font-size="12" fill="#333333">SAFE &amp; SECURE</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="85" cy="65" r="8" fill="#d5567c" opacity="0.6" />
+  <circle cx="315" cy="65" r="8" fill="#d5567c" opacity="0.6" />
+  <circle cx="85" cy="215" r="8" fill="#d5567c" opacity="0.6" />
+  <circle cx="315" cy="215" r="8" fill="#d5567c" opacity="0.6" />
+</svg>
