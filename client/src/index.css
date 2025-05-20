@@ -80,49 +80,82 @@
 }
 
 :root {
-      --background: 214 32% 98%;
---foreground: 222 47% 11%;
---muted: 210 40% 94%;
---muted-foreground: 215 16% 47%;
---popover: 0 0% 100%;
---popover-foreground: 222 47% 11%;
---card: 0 0% 100%;
---card-foreground: 222 47% 11%;
---border: 214 32% 91%;
---input: 214 32% 91%;
---primary: 255 92% 57%;
---primary-foreground: 210 40% 98%;
---secondary: 183 74% 35%;
---secondary-foreground: 210 40% 98%;
---accent: 262 83% 58%;
---accent-foreground: 0 0% 100%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 60 9.1% 97.8%;
---ring: 255 92% 57%;
---radius: 0.5rem;
-  }
-  .dark {
-      --background: 222 47% 11%;
---foreground: 210 40% 98%;
---muted: 217 33% 17%;
---muted-foreground: 215 20% 65%;
---popover: 222 47% 11%;
---popover-foreground: 210 40% 98%;
---card: 222 47% 11%;
---card-foreground: 210 40% 98%;
---border: 217 33% 17%;
---input: 217 33% 17%;
---primary: 338 85% 60%;
---primary-foreground: 355 100% 97%;
---secondary: 183 74% 35%;
---secondary-foreground: 210 40% 98%;
---accent: 306 64% 40%;
---accent-foreground: 0 0% 100%;
---destructive: 0 62.8% 30.6%;
---destructive-foreground: 0 0% 98%;
---ring: 212 12% 75%;
---radius: 0.5rem;
-  }
+  /* Pastel Pink and Cream Theme */
+  --background: 40 70% 96%; /* Pastel cream background */
+  --foreground: 340 30% 30%; /* Soft pink text */
+  --muted: 40 70% 90%; /* Lighter cream */
+  --muted-foreground: 340 25% 45%; /* Muted pink */
+  --popover: 40 70% 96%; /* Same as background */
+  --popover-foreground: 340 30% 30%; /* Same as foreground */
+  --card: 0 0% 100%; /* White cards */
+  --card-foreground: 340 30% 30%; /* Same as foreground */
+  --border: 340 30% 85%; /* Light pink border */
+  --input: 340 30% 92%; /* Light pink input */
+  --primary: 340 65% 75%; /* Pastel pink */
+  --primary-foreground: 0 0% 100%; /* White text on primary */
+  --secondary: 40 70% 85%; /* Pastel cream/beige secondary */
+  --secondary-foreground: 340 30% 30%; /* Pink text on secondary */
+  --accent: 340 80% 65%; /* Slightly more vibrant pink */
+  --accent-foreground: 0 0% 100%; /* White text on accent */
+  --destructive: 0 84.2% 60.2%; /* Keep destructive red */
+  --destructive-foreground: 60 9.1% 97.8%; /* Light text on destructive */
+  --ring: 340 65% 75%; /* Match primary */
+  --radius: 0.5rem;
+  /* Chart colors - pastel palette */
+  --chart-1: 340 65% 75%; /* Pink */
+  --chart-2: 40 70% 80%; /* Cream */
+  --chart-3: 340 45% 85%; /* Light pink */
+  --chart-4: 40 60% 85%; /* Light cream */
+  --chart-5: 340 30% 65%; /* Muted pink */
+  /* Sidebar colors */
+  --sidebar-background: 340 65% 95%; /* Very light pink */
+  --sidebar-foreground: 340 30% 30%; /* Dark pink text */
+  --sidebar-primary: 340 65% 75%; /* Same as primary */
+  --sidebar-primary-foreground: 0 0% 100%; /* White text on primary */
+  --sidebar-accent: 340 50% 65%; /* Muted accent for sidebar */
+  --sidebar-accent-foreground: 0 0% 100%; /* White text on accent */
+  --sidebar-border: 340 30% 85%; /* Light pink border */
+  --sidebar-ring: 340 65% 75%; /* Match primary */
+}
+  
+.dark {
+  /* Dark mode with pastel pink and cream tones */
+  --background: 340 30% 15%; /* Dark pink-purple background */
+  --foreground: 40 70% 90%; /* Light cream text */
+  --muted: 340 15% 25%; /* Darker muted pink */
+  --muted-foreground: 40 30% 80%; /* Muted cream text */
+  --popover: 340 30% 15%; /* Same as background */
+  --popover-foreground: 40 70% 90%; /* Same as foreground */
+  --card: 340 30% 20%; /* Slightly lighter card background */
+  --card-foreground: 40 70% 90%; /* Same as foreground */
+  --border: 340 20% 30%; /* Dark pink border */
+  --input: 340 20% 30%; /* Dark pink input */
+  --primary: 340 65% 65%; /* Pastel pink - slightly more muted for dark mode */
+  --primary-foreground: 0 0% 100%; /* White on primary */
+  --secondary: 40 50% 40%; /* Dark cream secondary */
+  --secondary-foreground: 0 0% 100%; /* White on secondary */
+  --accent: 340 80% 60%; /* Vibrant pink accent */
+  --accent-foreground: 0 0% 100%; /* White on accent */
+  --destructive: 0 62.8% 30.6%; /* Dark red destructive */
+  --destructive-foreground: 0 0% 98%; /* Light text on destructive */
+  --ring: 340 65% 65%; /* Match primary */
+  --radius: 0.5rem;
+  /* Chart colors - darker pastel palette */
+  --chart-1: 340 65% 65%; /* Pink */
+  --chart-2: 40 50% 60%; /* Cream */
+  --chart-3: 340 45% 55%; /* Light pink */
+  --chart-4: 40 45% 55%; /* Light cream */
+  --chart-5: 340 30% 45%; /* Muted pink */
+  /* Sidebar colors */
+  --sidebar-background: 340 30% 20%; /* Dark pink background */
+  --sidebar-foreground: 40 70% 90%; /* Cream text */
+  --sidebar-primary: 340 65% 65%; /* Same as primary */
+  --sidebar-primary-foreground: 0 0% 100%; /* White text */
+  --sidebar-accent: 340 50% 60%; /* Accent color */
+  --sidebar-accent-foreground: 0 0% 100%; /* White text */
+  --sidebar-border: 340 20% 30%; /* Dark pink border */
+  --sidebar-ring: 340 65% 65%; /* Match primary */
+}
 
 @layer base {
   * {
