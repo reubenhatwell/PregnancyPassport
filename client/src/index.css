@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-      --background: 0 0% 100%;
+      --background: 214 32% 98%;
 --foreground: 222 47% 11%;
---muted: 210 40% 96.1%;
+--muted: 210 40% 94%;
 --muted-foreground: 215 16% 47%;
 --popover: 0 0% 100%;
 --popover-foreground: 222 47% 11%;
@@ -13,15 +13,15 @@
 --card-foreground: 222 47% 11%;
 --border: 214 32% 91%;
 --input: 214 32% 91%;
---primary: 338 85% 60%;
---primary-foreground: 355 100% 97%;
+--primary: 255 92% 57%;
+--primary-foreground: 210 40% 98%;
 --secondary: 183 74% 35%;
 --secondary-foreground: 210 40% 98%;
---accent: 306 64% 40%;
+--accent: 262 83% 58%;
 --accent-foreground: 0 0% 100%;
 --destructive: 0 84.2% 60.2%;
 --destructive-foreground: 60 9.1% 97.8%;
---ring: 222 47% 11%;
+--ring: 255 92% 57%;
 --radius: 0.5rem;
   }
   .dark {
@@ -55,4 +55,74 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+}
+
+/* Calendar customization - vibrant theme */
+.rbc-calendar {
+  @apply rounded-lg shadow-md overflow-hidden;
+  background-color: white;
+}
+
+.rbc-toolbar {
+  @apply bg-primary text-primary-foreground p-3 mb-0 font-medium;
+}
+
+.rbc-toolbar button {
+  @apply border-none bg-transparent text-primary-foreground hover:bg-primary/80 transition-colors;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-white text-primary font-semibold shadow-sm;
+}
+
+.rbc-header {
+  @apply bg-secondary text-secondary-foreground py-2 font-bold;
+}
+
+.rbc-off-range-bg {
+  @apply bg-muted/50;
+}
+
+.rbc-today {
+  @apply bg-accent/10;
+}
+
+.rbc-event {
+  @apply bg-accent text-white font-medium border-none rounded-md;
+}
+
+.rbc-event-content {
+  @apply p-1;
+}
+
+.rbc-show-more {
+  @apply text-accent font-semibold;
+}
+
+.rbc-month-view, .rbc-time-view {
+  @apply border-muted;
+}
+
+.rbc-day-bg + .rbc-day-bg, .rbc-time-content, .rbc-time-header {
+  @apply border-muted;
+}
+
+.rbc-month-row + .rbc-month-row {
+  @apply border-muted;
+}
+
+.rbc-day-slot .rbc-time-slot {
+  @apply border-slate-100;
+}
+
+.rbc-timeslot-group {
+  @apply border-muted;
+}
+
+.rbc-time-content > * + * > * {
+  @apply border-muted;
+}
+
+.rbc-current-time-indicator {
+  @apply bg-primary h-0.5;
 }

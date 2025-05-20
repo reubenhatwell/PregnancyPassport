@@ -322,15 +322,37 @@ export default function Appointments() {
                           style={{ height: 700 }}
                           eventPropGetter={(event) => {
                             const isPast = new Date(event.start) < new Date();
+                            const appointment = event.resource;
+                            
+                            // Color-code appointments based on type and status
+                            let backgroundColor = '#7c3aed'; // Default violet/purple
+                            
+                            if (isPast) {
+                              backgroundColor = '#9CA3AF'; // Gray for past appointments
+                            } else if (appointment.type === 'ultrasound') {
+                              backgroundColor = '#3b82f6'; // Blue for ultrasounds
+                            } else if (appointment.type === 'checkup') {
+                              backgroundColor = '#059669'; // Green for regular checkups
+                            } else if (appointment.type === 'test') {
+                              backgroundColor = '#f59e0b'; // Amber for tests
+                            } else if (appointment.status === 'cancelled') {
+                              backgroundColor = '#6b7280'; // Gray for cancelled
+                            } else if (appointment.status === 'confirmed') {
+                              backgroundColor = '#7c3aed'; // Vibrant purple for confirmed
+                            } else if (appointment.status === 'rescheduled') {
+                              backgroundColor = '#e11d48'; // Red for rescheduled
+                            }
                             
                             return {
                               className: '',
                               style: {
-                                backgroundColor: isPast ? '#9CA3AF' : '#4F46E5',
+                                backgroundColor,
                                 color: 'white',
                                 borderRadius: '4px',
                                 border: 'none',
                                 padding: '2px 6px',
+                                fontWeight: '500',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
                               }
                             };
                           }}
