@@ -442,13 +442,23 @@ export default function Appointments() {
                       <div key={month}>
                         <h2 className="text-lg font-semibold text-gray-700 mb-3">{month}</h2>
                         <div className="space-y-3">
-                          {groupedAppointments[month].map(appointment => (
-                            <Card key={appointment.id} className="overflow-hidden">
-                              <div className={`h-1 ${new Date(appointment.dateTime) > new Date() ? "bg-primary-500" : "bg-gray-300"}`}></div>
-                              <CardContent className="p-4">
+                          {groupedAppointments[month].map(appointment => {
+                            // Color based on date (past/future)
+                            const isPast = new Date(appointment.dateTime) < new Date();
+                            const colorClass = isPast ? "bg-gray-400" : "bg-primary";
+                            
+                            return (
+                            <Card key={appointment.id} className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+                              <div className={`h-2 ${colorClass}`}></div>
+                              <CardContent className="p-4 bg-gradient-to-b from-white to-slate-50">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between">
                                   <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900">{appointment.title}</h3>
+                                    <div className="flex items-center justify-between">
+                                      <h3 className="font-medium text-gray-900">{appointment.title}</h3>
+                                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${colorClass} text-white`}>
+                                        {isPast ? "Past" : "Upcoming"}
+                                      </span>
+                                    </div>
                                     <div className="flex items-center text-sm text-gray-600 mt-1">
                                       <CalendarClock className="h-4 w-4 mr-1 flex-shrink-0" />
                                       <span>{formatDateTime(appointment.dateTime)} ({appointment.duration} mins)</span>
