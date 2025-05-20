@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Appointment } from "@/types";
@@ -116,7 +116,7 @@ export default function Appointments() {
   });
   
   // Update edit form when an appointment is selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedAppointment) {
       editForm.reset({
         title: selectedAppointment.title,
@@ -467,7 +467,9 @@ export default function Appointments() {
                                         variant="outline" 
                                         className="h-8"
                                         onClick={() => {
-                                          window.open(`https://maps.google.com?q=${encodeURIComponent(appointment.location)}`, '_blank');
+                                          if (appointment.location) {
+                                            window.open(`https://maps.google.com?q=${encodeURIComponent(appointment.location)}`, '_blank');
+                                          }
                                         }}
                                       >
                                         <Map className="h-3.5 w-3.5 mr-1" />
