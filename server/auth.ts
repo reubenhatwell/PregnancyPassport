@@ -1,13 +1,14 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User, insertUserSchema } from "@shared/schema";
+import { User, insertUserSchema, InsertSecurityLog } from "@shared/schema";
 import { z } from "zod";
 import { createFirebaseUser, findFirebaseUserByEmail, updateFirebaseUser } from "./firebase-service";
+import { SecurityLogger } from "./security-logger";
 
 declare global {
   namespace Express {
@@ -30,7 +31,18 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+// Helper function to extract client info from request
+function getClientInfo(req: Request) {
+  return {
+    ipAddress: req.ip || req.socket.remoteAddress || null,
+    userAgent: req.headers["user-agent"] || null
+  };
+}
+
 export function setupAuth(app: Express) {
+  // Initialize security logger
+  const securityLogger = new SecurityLogger(storage);
+  
   // Default session settings
   const getSessionSettings = (rememberMe = false): session.SessionOptions => ({
     secret: process.env.SESSION_SECRET || "digital-pregnancy-passport-secret",
@@ -165,12 +177,33 @@ export function setupAuth(app: Express) {
       req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 1; // 1 day
     }
     
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", async (err, user, info) => {
       if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Invalid username or password" });
       
-      req.login(user, (loginErr) => {
+      const { ipAddress, userAgent } = getClientInfo(req);
+      
+      if (!user) {
+        // Log failed login attempt
+        await securityLogger.logFailedLogin(
+          ipAddress,
+          userAgent,
+          req.body.username,
+          "Invalid credentials"
+        );
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      
+      req.login(user, async (loginErr) => {
         if (loginErr) return next(loginErr);
+        
+        // Log successful login
+        await securityLogger.logSuccessfulLogin(
+          user.id,
+          ipAddress,
+          userAgent,
+          user.username
+        );
+        
         // Don't send password back to client
         const { password, ...userWithoutPassword } = user;
         return res.status(200).json(userWithoutPassword);
@@ -178,7 +211,16 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post("/api/logout", async (req, res, next) => {
+    // Only log logout if user is actually authenticated
+    if (req.isAuthenticated()) {
+      const { ipAddress, userAgent } = getClientInfo(req);
+      const userId = req.user.id;
+      
+      // Log logout before actually logging out
+      await securityLogger.logLogout(userId, ipAddress, userAgent);
+    }
+    
     req.logout((err) => {
       if (err) return next(err);
       res.sendStatus(200);
@@ -250,6 +292,15 @@ export function setupAuth(app: Express) {
         console.error("Error updating Firebase password:", firebaseError);
         // Continue anyway as our main database is updated
       }
+      
+      // 3. Log the password reset for security audit
+      const { ipAddress, userAgent } = getClientInfo(req);
+      await securityLogger.logPasswordChange(
+        user.id,
+        ipAddress,
+        userAgent,
+        "reset" // Password was reset, not changed directly
+      );
       
       res.status(200).json({ message: "Password has been reset successfully. You can now log in with your new password." });
     } catch (error) {
