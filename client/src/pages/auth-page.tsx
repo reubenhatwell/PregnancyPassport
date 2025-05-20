@@ -113,7 +113,7 @@ export default function AuthPage() {
 
   const isPending = loginMutation.isPending || registerMutation.isPending || isLoading;
 
-  // Handle password reset request
+  // Handle password reset request using Firebase
   const handleForgotPassword = async () => {
     if (!resetEmail || !resetEmail.includes('@')) {
       toast({
@@ -127,17 +127,11 @@ export default function AuthPage() {
     setIsResettingPassword(true);
     
     try {
-      const response = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: resetEmail }),
-      });
+      // Use Firebase to send password reset email
+      const { sendPasswordReset } = await import('@/lib/firebase');
+      const success = await sendPasswordReset(resetEmail);
       
-      const data = await response.json();
-      
-      if (response.ok) {
+      if (success) {
         setResetEmailSent(true);
         toast({
           title: "Password reset email sent",
@@ -146,7 +140,7 @@ export default function AuthPage() {
       } else {
         toast({
           title: "Error",
-          description: data.message || "Failed to send password reset email",
+          description: "Failed to send password reset email. The email may not be registered in our system.",
           variant: "destructive",
         });
       }
