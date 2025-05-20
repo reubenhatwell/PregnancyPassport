@@ -7,6 +7,7 @@ import {
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, LoginData, RegisterData } from "@/types";
+import { initSessionTimeoutMonitor } from "../lib/session-timeout";
 
 type AuthContextType = {
   user: User | null;
@@ -29,6 +30,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
+  
+  // Initialize session timeout monitoring when user is logged in
+  useEffect(() => {
+    let cleanupFunction: (() => void) | undefined;
+    
+    if (user) {
+      // User is logged in, start monitoring for session timeout
+      // Default timeout is 30 minutes, can be customized
+      cleanupFunction = initSessionTimeoutMonitor();
+    }
+    
+    // Cleanup when component unmounts or user logs out
+    return () => {
+      if (cleanupFunction) {
+        cleanupFunction();
+      }
+    };
+  }, [user]);
   
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
