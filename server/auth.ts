@@ -7,6 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
+import { createFirebaseUser, findFirebaseUserByEmail } from "./firebase-service";
 
 declare global {
   namespace Express {
@@ -106,11 +107,30 @@ export function setupAuth(app: Express) {
       // Hash password
       const hashedPassword = await hashPassword(userData.password);
 
-      // Create user
+      // Create user in our database
       const user = await storage.createUser({
         ...userDataToSave,
         password: hashedPassword,
       });
+
+      // Also create the user in Firebase for authentication and password reset
+      try {
+        // Create display name from first and last name
+        const displayName = `${userData.firstName} ${userData.lastName}`;
+        
+        // Create a new Firebase user with the same email and password
+        await createFirebaseUser(
+          userData.email,
+          userData.password, // Firebase will hash this automatically
+          displayName
+        );
+        
+        console.log(`Firebase user created for ${userData.email}`);
+      } catch (firebaseError) {
+        // Log Firebase error but don't fail the registration process
+        console.error("Error creating Firebase user:", firebaseError);
+        // We still continue with our own user creation
+      }
 
       // Set the session cookie expiration based on rememberMe
       if (rememberMe) {
@@ -170,5 +190,32 @@ export function setupAuth(app: Express) {
     // Don't send password back to client
     const { password, ...userWithoutPassword } = req.user;
     res.json(userWithoutPassword);
+  });
+
+  // Endpoint to check if an email exists in the system
+  // Used by the password reset feature
+  app.post("/api/check-email", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Check if the email exists in our database
+      const user = await storage.getUserByEmail(email);
+      
+      // Also check if the user exists in Firebase
+      const firebaseUser = await findFirebaseUserByEmail(email);
+      
+      // We don't tell the client whether the email exists for security reasons
+      // Just return success (this is a security best practice)
+      res.status(200).json({ 
+        message: "If this email is registered, a password reset link will be sent"
+      });
+    } catch (error) {
+      console.error("Error checking email:", error);
+      res.status(500).json({ message: "An error occurred while checking email" });
+    }
   });
 }
