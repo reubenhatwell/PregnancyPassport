@@ -233,6 +233,24 @@ export function setupAuth(app: Express) {
     const { password, ...userWithoutPassword } = req.user;
     res.json(userWithoutPassword);
   });
+  
+  // Special endpoint to log session timeouts
+  app.post("/api/session-timeout", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const { ipAddress, userAgent } = getClientInfo(req);
+      const userId = req.user.id;
+      
+      // Log the session timeout event
+      await securityLogger.logSessionTimeout(userId, ipAddress, userAgent);
+      
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error logging session timeout:", error);
+      res.sendStatus(500);
+    }
+  });
 
   // Endpoint to check if an email exists in the system
   // Used by the password reset feature

@@ -127,7 +127,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: "Your session has expired due to inactivity. Please log in again.",
           variant: "default",
         });
-        logoutMutation.mutate();
+        
+        // Use custom mutation for session timeout to track it specifically
+        // We'll send a different endpoint that will log this as a timeout rather than regular logout
+        const timeoutLogout = async () => {
+          try {
+            // Log this as a session timeout instead of normal logout
+            await apiRequest("POST", "/api/session-timeout");
+            // Then perform normal logout action
+            logoutMutation.mutate();
+          } catch (err) {
+            // If the timeout endpoint fails, still do the regular logout
+            logoutMutation.mutate();
+          }
+        };
+        
+        timeoutLogout();
       }, INACTIVE_TIMEOUT);
     };
     
