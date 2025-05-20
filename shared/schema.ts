@@ -1,6 +1,16 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Session table for auth persistence
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  }
+);
 
 // Enums for better type safety and consistent data
 export const roleEnum = pgEnum('role_type', ['patient', 'clinician', 'admin']);

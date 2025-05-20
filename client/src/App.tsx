@@ -18,6 +18,7 @@ import Education from "@/pages/education";
 import Settings from "@/pages/settings";
 import AntenatalRecord from "@/pages/antenatal-record";
 import ClinicianDashboard from "@/pages/clinician-dashboard";
+import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -41,6 +42,9 @@ function Router() {
       {/* Clinician routes */}
       <ProtectedRoute path="/clinician-dashboard" component={ClinicianDashboard} />
       <ProtectedRoute path="/clinician" component={ClinicianDashboard} />
+      
+      {/* Admin routes */}
+      <ProtectedRoute path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );
