@@ -63,6 +63,7 @@ export default function Appointments() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [calendarView, setCalendarView] = useState<"list" | "calendar">("calendar");
   const [calendarDate, setCalendarDate] = useState(new Date());
+  const [error, setError] = useState<boolean>(false);
   
   // Function to determine if user is a clinician
   const isClinician = user?.role === "clinician" || user?.role === "admin";
@@ -449,22 +450,35 @@ export default function Appointments() {
               <TabsContent value="list">
                 {isLoading ? (
                   <div className="text-center py-8">
-                    <p>Loading appointments...</p>
+                    <div className="flex flex-col items-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
+                      <p className="text-gray-600">Loading your appointments...</p>
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="error-container">
+                    <div className="flex flex-col items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-lg font-medium mb-2">Unable to load appointments</h3>
+                      <p className="text-sm">Please try again later or contact support if the problem persists.</p>
+                    </div>
                   </div>
                 ) : appointments?.length === 0 ? (
-                  <Card>
-                    <CardContent className="pt-6 text-center py-10">
-                      <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments scheduled</h3>
-                      <p className="text-gray-500 mb-4">Schedule your first appointment to get started.</p>
+                  <div className="empty-state-container">
+                    <div className="flex flex-col items-center">
+                      <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No appointments yet</h3>
+                      <p className="text-sm mb-4">You don't have any scheduled appointments.</p>
                       {isClinician && (
-                        <Button onClick={() => setIsAddDialogOpen(true)}>
+                        <Button onClick={() => setIsAddDialogOpen(true)} variant="outline">
                           <Plus className="h-4 w-4 mr-2" />
-                          Schedule Appointment
+                          Schedule an appointment
                         </Button>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ) : (
                   <div className="space-y-8">
                     {sortedMonths.map(month => (
