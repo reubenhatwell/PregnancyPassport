@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   useQuery,
   useMutation,
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
-
+  
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
@@ -107,6 +107,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
+  
+  // Session timeout settings
+  const INACTIVE_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+  
+  // Set up session timeout tracking
+  useEffect(() => {
+    if (!user) return; // Only track for logged-in users
+    
+    let inactivityTimer: number;
+    
+    // Function to reset the inactivity timer
+    const resetInactivityTimer = () => {
+      window.clearTimeout(inactivityTimer);
+      inactivityTimer = window.setTimeout(() => {
+        // Log user out after inactivity period
+        toast({
+          title: "Session expired",
+          description: "Your session has expired due to inactivity. Please log in again.",
+          variant: "default",
+        });
+        logoutMutation.mutate();
+      }, INACTIVE_TIMEOUT);
+    };
+    
+    // Set initial timer
+    resetInactivityTimer();
+    
+    // Events to track user activity
+    const activityEvents = [
+      'mousedown', 'mousemove', 'keypress', 
+      'scroll', 'touchstart', 'click'
+    ];
+    
+    // Event listener for user activity
+    const handleUserActivity = () => {
+      resetInactivityTimer();
+    };
+    
+    // Add event listeners
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity);
+    });
+    
+    // Clean up
+    return () => {
+      window.clearTimeout(inactivityTimer);
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity);
+      });
+    };
+  }, [user, toast, logoutMutation]);
 
   return (
     <AuthContext.Provider
