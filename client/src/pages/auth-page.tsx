@@ -152,10 +152,29 @@ export default function AuthPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error in password reset:", error);
+      
+      // Show more specific error message if available
+      let errorMessage = "An unexpected error occurred";
+      if (error.code) {
+        // Map Firebase error codes to user-friendly messages
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorMessage = "The email address is not valid.";
+            break;
+          case 'auth/user-not-found':
+            // We don't want to expose if a user exists or not for security
+            errorMessage = "If this email is registered, you'll receive reset instructions.";
+            break;
+          default:
+            errorMessage = `Error: ${error.message || "Please try again later."}`;
+        }
+      }
+      
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
+        title: "Password Reset Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
