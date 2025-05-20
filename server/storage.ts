@@ -22,7 +22,13 @@ import {
   InsertMessage,
   educationModules,
   EducationModule,
-  InsertEducationModule
+  InsertEducationModule,
+  securityLogs,
+  SecurityLog,
+  InsertSecurityLog,
+  dataConsents,
+  DataConsent,
+  InsertDataConsent
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -39,6 +45,10 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<boolean>;
   getAllPatients(): Promise<User[]>; // Get all users with role="patient"
+  
+  // Security audit logging
+  logSecurityEvent(insertLog: InsertSecurityLog): Promise<SecurityLog>;
+  getUserSecurityLogs(userId: number): Promise<SecurityLog[]>;
   
   // Pregnancy operations
   getPregnancy(id: number): Promise<Pregnancy | undefined>;
@@ -105,6 +115,8 @@ export class MemStorage implements IStorage {
   private scans: Map<number, Scan>;
   private messages: Map<number, Message>;
   private educationModules: Map<number, EducationModule>;
+  private securityLogs: Map<number, SecurityLog>;
+  private dataConsents: Map<number, DataConsent>;
   
   sessionStore: SessionStore;
   
@@ -116,6 +128,8 @@ export class MemStorage implements IStorage {
   private scanIdCounter: number;
   private messageIdCounter: number;
   private educationModuleIdCounter: number;
+  private securityLogIdCounter: number;
+  private dataConsentIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -126,6 +140,8 @@ export class MemStorage implements IStorage {
     this.scans = new Map();
     this.messages = new Map();
     this.educationModules = new Map();
+    this.securityLogs = new Map();
+    this.dataConsents = new Map();
     
     this.userIdCounter = 1;
     this.pregnancyIdCounter = 1;
@@ -135,6 +151,8 @@ export class MemStorage implements IStorage {
     this.scanIdCounter = 1;
     this.messageIdCounter = 1;
     this.educationModuleIdCounter = 1;
+    this.securityLogIdCounter = 1;
+    this.dataConsentIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
@@ -858,6 +876,27 @@ export class MemStorage implements IStorage {
     [...messages, ...messages2].forEach(message => {
       this.messages.set(message.id, message);
     });
+  }
+  
+  // Security audit logging methods
+  async logSecurityEvent(insertLog: InsertSecurityLog): Promise<SecurityLog> {
+    const id = this.securityLogIdCounter++;
+    const timestamp = new Date();
+    
+    const securityLog: SecurityLog = {
+      ...insertLog,
+      id,
+      timestamp
+    };
+    
+    this.securityLogs.set(id, securityLog);
+    return securityLog;
+  }
+  
+  async getUserSecurityLogs(userId: number): Promise<SecurityLog[]> {
+    return Array.from(this.securityLogs.values())
+      .filter(log => log.userId === userId)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
   
   initializeEducationModules() {
