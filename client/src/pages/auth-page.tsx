@@ -134,7 +134,11 @@ export default function AuthPage() {
         title: "Login successful",
         description: `Welcome back, ${data.firstName || 'User'}!`,
       });
-      navigate("/redirect");
+      
+      // Force a direct redirect by adding a small delay
+      setTimeout(() => {
+        window.location.href = "/redirect";
+      }, 500);
     },
     onError: (error: any) => {
       toast({
@@ -156,7 +160,11 @@ export default function AuthPage() {
         title: "Registration successful",
         description: `Welcome, ${data.firstName || 'User'}!`,
       });
-      navigate("/redirect");
+      
+      // Force a direct redirect by adding a small delay
+      setTimeout(() => {
+        window.location.href = "/redirect";
+      }, 500);
     },
     onError: (error: any) => {
       toast({
