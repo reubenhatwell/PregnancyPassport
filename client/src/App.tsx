@@ -23,33 +23,105 @@ import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
 import RedirectPage from "@/pages/redirect-page";
 
+// Create wrapper components to handle props correctly
+const DashboardWrapper = () => <Dashboard />;
+const AppointmentsWrapper = () => <Appointments />;
+const HealthTrackingWrapper = () => <HealthTracking />;
+const ScansImagesWrapper = () => <ScansImages />;
+const TestResultsWrapper = () => <TestResults />;
+const AntenatalRecordWrapper = () => <AntenatalRecord />;
+const MessagesWrapper = () => <Messages />;
+const EducationWrapper = () => <Education />;
+const SettingsWrapper = () => <Settings />;
+const ClinicianDashboardWrapper = () => <ClinicianDashboard />;
+const PatientDirectoryWrapper = () => <PatientDirectory />;
+const RedirectPageWrapper = () => <RedirectPage />;
+const AdminPageWrapper = () => <AdminPage />; 
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth-page" component={AuthPage} />
-      <Route path="/redirect" component={RedirectPage} />
+      <Route path="/redirect" component={RedirectPageWrapper} />
       
-      {/* Patient routes */}
-      <ProtectedRoute path="/patient-dashboard" component={Dashboard} />
-      <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/appointments" component={Appointments} />
-      <ProtectedRoute path="/health-tracking" component={HealthTracking} />
-      <ProtectedRoute path="/scans-images" component={ScansImages} />
-      <ProtectedRoute path="/test-results" component={TestResults} />
-      <ProtectedRoute path="/antenatal-record" component={AntenatalRecord} />
-      <ProtectedRoute path="/messages" component={Messages} />
-      <ProtectedRoute path="/education" component={Education} />
-      <ProtectedRoute path="/settings" component={Settings} />
+      {/* Patient routes with proper role restrictions */}
+      <ProtectedRoute 
+        path="/patient-dashboard" 
+        component={DashboardWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/dashboard" 
+        component={DashboardWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/appointments" 
+        component={AppointmentsWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/health-tracking" 
+        component={HealthTrackingWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/scans-images" 
+        component={ScansImagesWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/test-results" 
+        component={TestResultsWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/antenatal-record" 
+        component={AntenatalRecordWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/messages" 
+        component={MessagesWrapper} 
+        allowedRoles={["patient", "clinician"]}
+      />
+      <ProtectedRoute 
+        path="/education" 
+        component={EducationWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/settings" 
+        component={SettingsWrapper} 
+        allowedRoles={["patient", "clinician", "admin"]}
+      />
       
-      {/* Clinician routes */}
-      <Route path="/patient-directory" component={PatientDirectory} />
-      <ProtectedRoute path="/clinician-dashboard" component={ClinicianDashboard} />
-      <ProtectedRoute path="/clinician-dashboard/:patientId" component={ClinicianDashboard} />
-      <ProtectedRoute path="/clinician" component={RedirectPage} />
+      {/* Clinician routes with proper access controls */}
+      <Route path="/patient-directory" component={PatientDirectoryWrapper} />
+      <ProtectedRoute 
+        path="/clinician-dashboard" 
+        component={ClinicianDashboardWrapper} 
+        allowedRoles={["clinician", "admin"]}
+      />
+      <Route 
+        path="/clinician-dashboard/:patientId" 
+        component={({ params }) => (
+          <ClinicianDashboard patientId={params?.patientId} />
+        )} 
+      />
+      <ProtectedRoute 
+        path="/clinician" 
+        component={RedirectPageWrapper} 
+        allowedRoles={["clinician", "admin"]}
+      />
       
       {/* Admin routes */}
-      <ProtectedRoute path="/admin" component={AdminPage} />
+      <ProtectedRoute 
+        path="/admin" 
+        component={AdminPageWrapper} 
+        allowedRoles={["admin"]}
+      />
       <Route component={NotFound} />
     </Switch>
   );
