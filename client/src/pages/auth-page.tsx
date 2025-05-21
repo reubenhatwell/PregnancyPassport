@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -28,63 +28,66 @@ import {
   BookOpen, 
   Calendar, 
   MessageSquare, 
-  FileText, 
-  ChevronRight, 
-  ExternalLink,
-  Menu,
-  X,
-  Baby,
-  HelpCircle,
-  BarChart3
+  Settings,
+  LucideIcon,
+  FileText,
+  Activity,
+  Image,
+  Mail,
+  Lock,
+  Send
 } from "lucide-react";
-import { UserRole } from "@/types";
-import logoImage from "../assets/image_1747633957966.png";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
+// Define user roles
+type UserRole = "patient" | "clinician";
+
+// Login schema
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
-  role: z.enum(["patient", "clinician"]),
-  rememberMe: z.boolean().optional().default(false),
+  role: z.enum(["patient", "clinician"] as const),
+  rememberMe: z.boolean().default(false)
 });
 
+// Registration schema with enhanced validation
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-  email: z.string().email("Invalid email address"),
+    .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character"),
+  email: z.string().email("Please enter a valid email address"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["patient", "clinician"]),
-  rememberMe: z.boolean().optional().default(false),
+  role: z.enum(["patient", "clinician"] as const),
+  rememberMe: z.boolean().default(false)
 });
 
 export default function AuthPage() {
+  const [_, navigate] = useLocation();
+  const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
-  const [location, navigate] = useLocation();
-  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
-  const [showPasswordResetConfirmDialog, setShowPasswordResetConfirmDialog] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const { user, loginMutation, registerMutation, isLoading } = useAuth();
+  const [showPasswordResetConfirmDialog, setShowPasswordResetConfirmDialog] = useState(false);
 
-  // Check URL parameters for password reset
+  // Handle password reset or verification code from URL
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('mode');
-    const email = params.get('email');
-    const oobCode = params.get('oobCode');
+    const searchParams = new URLSearchParams(window.location.search);
+    const mode = searchParams.get("mode");
+    const oobCode = searchParams.get("oobCode");
     
-    if (mode === 'resetPassword' && email && oobCode) {
+    if (mode === "resetPassword" && oobCode) {
+      setIsResettingPassword(true);
       setShowPasswordResetConfirmDialog(true);
-      setResetEmail(email);
       setResetCode(oobCode);
     }
   }, []);
@@ -92,14 +95,8 @@ export default function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      // Redirect to the appropriate dashboard based on user role
-      if (user.role === "patient") {
-        navigate("/patient-dashboard");
-      } else if (user.role === "clinician") {
-        navigate("/patient-directory");
-      } else {
-        navigate("/");
-      }
+      // Use our centralized redirect page
+      navigate("/redirect");
     }
   }, [user, navigate]);
 
@@ -126,6 +123,46 @@ export default function AuthPage() {
     },
   });
 
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: (data: z.infer<typeof loginSchema>) => 
+      apiRequest("/api/login", { method: "POST", data }),
+    onSuccess: (data) => {
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${data.firstName}!`,
+      });
+      navigate("/redirect");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid username or password",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: (data: z.infer<typeof registerSchema>) => 
+      apiRequest("/api/register", { method: "POST", data }),
+    onSuccess: (data) => {
+      toast({
+        title: "Registration successful",
+        description: `Welcome, ${data.firstName}!`,
+      });
+      navigate("/redirect");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Could not create account. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const onLoginSubmit = (data: z.infer<typeof loginSchema>) => {
     loginMutation.mutate(data);
   };
@@ -147,57 +184,77 @@ export default function AuthPage() {
       return;
     }
 
-    setIsResettingPassword(true);
-    
     try {
-      // Use Firebase to send password reset email
-      console.log('Beginning password reset process');
-      const { sendPasswordReset } = await import('@/lib/firebase');
-      
-      // For testing purposes, display a toast to show we're trying to send the email
-      toast({
-        title: "Processing",
-        description: "Sending password reset email...",
+      setIsResettingPassword(true);
+      // Send password reset email
+      await apiRequest("/api/reset-password", { 
+        method: "POST", 
+        data: { email: resetEmail } 
       });
       
-      const success = await sendPasswordReset(resetEmail);
+      setResetEmailSent(true);
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for the reset link",
+      });
+    } catch (error) {
+      toast({
+        title: "Password reset failed",
+        description: "Could not send password reset email. Please try again.",
+        variant: "destructive",
+      });
+      setIsResettingPassword(false);
+    }
+  };
+
+  // Handle password reset confirm
+  const handlePasswordResetConfirm = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Please make sure your passwords match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsResettingPassword(true);
+      // Reset password
+      await apiRequest("/api/confirm-reset-password", { 
+        method: "POST", 
+        data: { 
+          email: resetEmail,
+          newPassword,
+          resetCode
+        } 
+      });
       
-      if (success) {
-        setResetEmailSent(true);
-        toast({
-          title: "Password reset email sent",
-          description: "Please check your inbox for password reset instructions",
-        });
-      } else {
-        toast({
-          title: "Unable to send email",
-          description: "Please check if the email address is correct or try again later.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error in password reset:", error);
-      
-      // Show more specific error message if available
-      let errorMessage = "An unexpected error occurred";
-      if (error.code) {
-        // Map Firebase error codes to user-friendly messages
-        switch (error.code) {
-          case 'auth/invalid-email':
-            errorMessage = "The email address is not valid.";
-            break;
-          case 'auth/user-not-found':
-            // We don't want to expose if a user exists or not for security
-            errorMessage = "If this email is registered, you'll receive reset instructions.";
-            break;
-          default:
-            errorMessage = `Error: ${error.message || "Please try again later."}`;
-        }
-      }
+      setShowPasswordResetConfirmDialog(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      setResetCode("");
       
       toast({
-        title: "Password Reset Failed",
-        description: errorMessage,
+        title: "Password reset successful",
+        description: "Your password has been reset. You can now log in with your new password.",
+      });
+      
+      setResetEmail("");
+      setActiveTab("login");
+    } catch (error) {
+      toast({
+        title: "Password reset failed",
+        description: "Could not reset password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -205,140 +262,345 @@ export default function AuthPage() {
     }
   };
 
-  // Handle the password reset confirmation
-  const handlePasswordReset = async () => {
-    // Validation
-    if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "Your password must be at least 8 characters long",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords match",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsResettingPassword(true);
-    
-    try {
-      // Call our server API to update the password
-      const response = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: resetEmail,
-          newPassword,
-          oobCode: resetCode
-        }),
-      });
-      
-      if (response.ok) {
-        toast({
-          title: "Password reset successful",
-          description: "You can now log in with your new password"
-        });
-        
-        // Close the dialog and reset fields
-        setShowPasswordResetConfirmDialog(false);
-        setNewPassword("");
-        setConfirmPassword("");
-        setResetCode("");
-        
-        // Pre-fill the login form with the email
-        loginForm.setValue("username", resetEmail);
-        setActiveTab("login");
-      } else {
-        const data = await response.json();
-        toast({
-          title: "Password reset failed",
-          description: data.message || "There was an error resetting your password",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
-    } finally {
-      setIsResettingPassword(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-pink-400 to-pink-700 overflow-auto px-4 py-8">
-      {/* Forgot Password Dialog */}
-      <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-50 to-pink-100 p-4">
+      <Card className="w-full max-w-md shadow-lg border-pink-200">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight text-pink-700 flex items-center justify-center gap-2">
+            <Heart className="h-6 w-6 text-pink-600" />
+            Pregnancy Care Portal
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Access your pregnancy care information securely
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Register</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your username" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter your password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={loginForm.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>I am a:</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-1 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="patient" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">Patient</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-1 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="clinician" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">Clinician</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={loginForm.control}
+                    name="rememberMe"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="cursor-pointer">Remember me for 30 days</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-pink-600 hover:bg-pink-700"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logging in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                  
+                  <div className="text-center">
+                    <Button
+                      variant="link"
+                      className="text-pink-600 hover:text-pink-700 text-sm"
+                      onClick={() => setIsResettingPassword(true)}
+                      type="button"
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="register">
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="First name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Last name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Create a username" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="Your email address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Create a password" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Must be at least 8 characters with uppercase, number, and special character
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>I am a:</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-1 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="patient" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">Patient</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-1 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="clinician" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">Clinician</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="rememberMe"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="cursor-pointer">Remember me for 30 days</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-pink-600 hover:bg-pink-700"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        
+        <CardFooter className="flex flex-col space-y-4 text-center">
+          <div className="text-sm text-muted-foreground">
+            Secure access to your pregnancy health records and resources
+          </div>
+          <div className="flex justify-center space-x-3">
+            <ShieldCheck className="h-5 w-5 text-pink-600" />
+            <LockIcon className="h-5 w-5 text-pink-600" />
+          </div>
+        </CardFooter>
+      </Card>
+      
+      {/* Password Reset Dialog */}
+      <Dialog open={isResettingPassword && !showPasswordResetConfirmDialog} onOpenChange={setIsResettingPassword}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Reset your password</DialogTitle>
             <DialogDescription>
               {resetEmailSent ? 
-                "We've sent password reset instructions to your email." :
-                "Enter your email address and we'll send you instructions to reset your password."
+                "We've sent you a reset link. Please check your email." : 
+                "Enter your email address and we'll send you a link to reset your password."
               }
             </DialogDescription>
           </DialogHeader>
           
           {!resetEmailSent ? (
             <>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-gray-700">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    className="border-gray-300"
-                  />
-                </div>
+              <div className="flex flex-col gap-4 py-4">
+                <Label htmlFor="reset-email">Email address</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="col-span-3"
+                />
               </div>
               <DialogFooter>
                 <Button 
                   type="button" 
-                  variant="ghost" 
-                  onClick={() => setShowForgotPasswordDialog(false)}
+                  variant="outline" 
+                  onClick={() => setIsResettingPassword(false)}
                 >
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleForgotPassword} 
-                  disabled={isResettingPassword}
-                  className="bg-gradient-to-r from-primary-500 to-primary-600"
+                  type="button" 
+                  onClick={handleForgotPassword}
+                  className="bg-pink-600 hover:bg-pink-700"
                 >
-                  {isResettingPassword ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : "Send reset instructions"}
+                  <Send className="mr-2 h-4 w-4" />
+                  Send reset link
                 </Button>
               </DialogFooter>
             </>
           ) : (
             <DialogFooter>
               <Button 
-                onClick={() => {
-                  setShowForgotPasswordDialog(false);
-                  setResetEmailSent(false);
-                  setResetEmail("");
-                }}
-                className="bg-gradient-to-r from-primary-500 to-primary-600"
+                type="button" 
+                onClick={() => setIsResettingPassword(false)}
+                className="bg-pink-600 hover:bg-pink-700"
               >
-                Close
+                Return to login
               </Button>
             </DialogFooter>
           )}
@@ -349,437 +611,87 @@ export default function AuthPage() {
       <Dialog open={showPasswordResetConfirmDialog} onOpenChange={setShowPasswordResetConfirmDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Set a new password</DialogTitle>
+            <DialogTitle>Set new password</DialogTitle>
             <DialogDescription>
-              Enter your new password below to complete the password reset process.
+              Please enter your new password
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="newPassword" className="text-gray-700">New Password</Label>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
               <Input
-                id="newPassword"
+                id="new-password"
                 type="password"
+                placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                className="border-gray-300"
               />
-              <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
             </div>
             
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword" className="text-gray-700">Confirm Password</Label>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
               <Input
-                id="confirmPassword"
+                id="confirm-password"
                 type="password"
+                placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="border-gray-300"
               />
             </div>
           </div>
           
-          <DialogFooter>
-            <Button 
-              onClick={handlePasswordReset} 
-              disabled={isResettingPassword}
-              className="bg-gradient-to-r from-primary-500 to-primary-600"
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowPasswordResetConfirmDialog(false);
+                setIsResettingPassword(false);
+              }}
+              disabled={isPending}
             >
-              {isResettingPassword ? (
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handlePasswordResetConfirm}
+              className="bg-pink-600 hover:bg-pink-700"
+              disabled={isPending}
+            >
+              {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Resetting password...
+                  Processing...
                 </>
-              ) : "Reset Password"}
+              ) : (
+                "Reset Password"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <div className="flex-1 flex items-center justify-center p-2 md:p-8">
-        <Card className="w-full max-w-md shadow-xl border-0 max-h-[90vh] md:max-h-none overflow-y-auto">
-          <CardHeader className="space-y-1 text-center bg-gradient-to-r from-pink-50 to-pink-100 rounded-t-lg py-6">
-            <div className="flex justify-center mb-4">
-              <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-24 w-auto" />
-            </div>
-            <CardTitle className="text-3xl font-heading text-primary-700">
-              Digital Pregnancy Passport
-            </CardTitle>
-            <CardDescription className="text-gray-700 text-lg">
-              Your pregnancy journey in one secure place
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100">
-                <TabsTrigger value="login" className="text-base">Login</TabsTrigger>
-                <TabsTrigger value="register" className="text-base">Register</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <ShieldCheck className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800">Welcome back!</h3>
-                      <div className="mt-1 text-sm text-blue-700">
-                        Log in securely to access your personalized pregnancy journey.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <Form {...loginForm}>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    loginForm.handleSubmit(onLoginSubmit)(e);
-                  }} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Username</FormLabel>
-                          <FormControl>
-                            <Input placeholder="johndoe" className="border-gray-300" {...field} />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="••••••••" className="border-gray-300" {...field} />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={loginForm.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-gray-700">Login as</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="flex space-x-1"
-                            >
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
-                                <RadioGroupItem value="patient" id="login-patient" className="sr-only" />
-                                <Label htmlFor="login-patient" className="flex items-center cursor-pointer">
-                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-400"}`} />
-                                  <span className="text-gray-700">Patient</span>
-                                </Label>
-                              </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
-                                <RadioGroupItem value="clinician" id="login-clinician" className="sr-only" />
-                                <Label htmlFor="login-clinician" className="flex items-center cursor-pointer">
-                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
-                                  <span className="text-gray-700">Clinician</span>
-                                </Label>
-                              </div>
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="flex items-center justify-between">
-                      <FormField
-                        control={loginForm.control}
-                        name="rememberMe"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <input 
-                                type="checkbox" 
-                                checked={field.value}
-                                onChange={field.onChange}
-                                id="login-remember-me" 
-                                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                              />
-                            </FormControl>
-                            <Label htmlFor="login-remember-me" className="text-sm text-gray-700">
-                              Remember me
-                            </Label>
-                          </FormItem>
-                        )}
-                      />
-                      <Button 
-                        variant="link" 
-                        className="p-0 h-auto text-primary-600 hover:text-primary-500"
-                        onClick={() => setShowForgotPasswordDialog(true)}
-                      >
-                        Forgot password?
-                      </Button>
-                    </div>
-                    <Button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white" disabled={isPending}>
-                      {isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        "Sign in"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              
-              <TabsContent value="register">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h3 className="font-medium text-primary-700 mb-3 flex items-center">
-                      <BookOpen className="h-5 w-5 mr-2" />
-                      Everything in One Place
-                    </h3>
-                    <p className="text-sm text-gray-600">Track your appointments, test results, and vital stats throughout your pregnancy journey.</p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary-700 mb-3 flex items-center">
-                      <ShieldCheck className="h-5 w-5 mr-2" />
-                      Secure & Private
-                    </h3>
-                    <p className="text-sm text-gray-600">Your data is protected with industry-leading security standards and privacy controls.</p>
-                  </div>
-                </div>
-                
-                <Form {...registerForm}>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    registerForm.handleSubmit(onRegisterSubmit)(e);
-                  }} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700">First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John" className="border-gray-300" {...field} />
-                            </FormControl>
-                            <FormMessage className="text-red-500" />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700">Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Doe" className="border-gray-300" {...field} />
-                            </FormControl>
-                            <FormMessage className="text-red-500" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="john.doe@example.com" className="border-gray-300" {...field} />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Username</FormLabel>
-                          <FormControl>
-                            <Input placeholder="johndoe" className="border-gray-300" {...field} />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="••••••••" className="border-gray-300" {...field} />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                          <FormDescription className="text-gray-500 text-xs">
-                            Must be at least 8 characters long
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-gray-700">Account Type</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="flex space-x-1"
-                            >
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "patient" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
-                                <RadioGroupItem value="patient" id="patient" className="sr-only" />
-                                <Label htmlFor="patient" className="flex items-center cursor-pointer">
-                                  <Heart className={`h-4 w-4 mr-2 ${field.value === "patient" ? "text-pink-500" : "text-rose-400"}`} />
-                                  <span className="text-gray-700">Patient</span>
-                                </Label>
-                              </div>
-                              <div className={`flex items-center justify-center flex-1 space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50 transition-colors ${field.value === "clinician" ? "bg-pink-50 border-pink-300" : "border-gray-200"}`}>
-                                <RadioGroupItem value="clinician" id="clinician" className="sr-only" />
-                                <Label htmlFor="clinician" className="flex items-center cursor-pointer">
-                                  <User className={`h-4 w-4 mr-2 ${field.value === "clinician" ? "text-pink-500" : "text-primary-400"}`} />
-                                  <span className="text-gray-700">Clinician</span>
-                                </Label>
-                              </div>
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 mb-2">
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
-                        <Calendar className="h-5 w-5 text-primary-500 mb-2" />
-                        <span className="text-xs text-gray-700">Track Appointments</span>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
-                        <MessageSquare className="h-5 w-5 text-primary-500 mb-2" />
-                        <span className="text-xs text-gray-700">Secure Messaging</span>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col items-center text-center">
-                        <FileText className="h-5 w-5 text-primary-500 mb-2" />
-                        <span className="text-xs text-gray-700">Health Records</span>
-                      </div>
-                    </div>
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="rememberMe"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 mb-4">
-                          <FormControl>
-                            <input 
-                              type="checkbox" 
-                              checked={field.value}
-                              onChange={field.onChange}
-                              id="register-remember-me" 
-                              className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                            />
-                          </FormControl>
-                          <Label htmlFor="register-remember-me" className="text-sm text-gray-700">
-                            Remember me
-                          </Label>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white" disabled={isPending}>
-                      {isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating account...
-                        </>
-                      ) : (
-                        "Create Account"
-                      )}
-                    </Button>
-                    
-                    <p className="text-xs text-center text-gray-500 mt-4">
-                      By creating an account, you agree to our Terms of Service and Privacy Policy.
-                    </p>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="hidden md:flex flex-1 bg-primary-800 items-center justify-center p-8">
-        <div className="max-w-md text-white">
-          <div className="mb-8">
-            <h1 className="text-4xl font-heading font-bold mb-4">
-              Australia's First Digital Pregnancy Passport
-            </h1>
-            <p className="text-primary-100 text-lg">
-              A secure, comprehensive digital platform connecting patients and clinicians for better pregnancy care.
-            </p>
-          </div>
-          
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary-700 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Secure Digital Records</h3>
-                <p className="text-primary-100">Say goodbye to paper records that can be lost or damaged.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary-700 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Health Tracking</h3>
-                <p className="text-primary-100">Monitor vital signs, test results, and pregnancy milestones.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary-700 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Better Communication</h3>
-                <p className="text-primary-100">Direct messaging between patients and healthcare providers.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
+  );
+}
+
+// Lock icon component
+function LockIcon(props: React.ComponentProps<"svg">) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
   );
 }

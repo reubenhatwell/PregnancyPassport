@@ -21,12 +21,14 @@ import ClinicianDashboard from "@/pages/clinician-dashboard";
 import PatientDirectory from "@/pages/patient-directory";
 import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
+import RedirectPage from "@/pages/redirect-page";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth-page" component={AuthPage} />
+      <Route path="/redirect" component={RedirectPage} />
       
       {/* Patient routes */}
       <ProtectedRoute path="/patient-dashboard" component={Dashboard} />
@@ -44,7 +46,7 @@ function Router() {
       <ProtectedRoute path="/patient-directory" component={PatientDirectory} />
       <ProtectedRoute path="/clinician-dashboard" component={ClinicianDashboard} />
       <ProtectedRoute path="/clinician-dashboard/:patientId" component={ClinicianDashboard} />
-      <ProtectedRoute path="/clinician" component={ClinicianDashboard} />
+      <ProtectedRoute path="/clinician" component={RedirectPage} />
       
       {/* Admin routes */}
       <ProtectedRoute path="/admin" component={AdminPage} />
