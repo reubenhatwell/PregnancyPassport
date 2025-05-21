@@ -96,7 +96,7 @@ export default function AuthPage() {
       if (user.role === "patient") {
         navigate("/patient-dashboard");
       } else if (user.role === "clinician") {
-        navigate("/clinician-dashboard");
+        navigate("/patient-directory");
       } else {
         navigate("/");
       }

@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user.role === "patient") {
         window.location.href = "/patient-dashboard";
       } else if (user.role === "clinician") {
-        window.location.href = "/clinician-dashboard";
+        window.location.href = "/patient-directory";
       }
       
       toast({
@@ -73,6 +73,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Login failed",
         description: error.message || "Invalid username or password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/logout");
+    },
+    onSuccess: () => {
+      // Clear user data and redirect to login page
+      queryClient.setQueryData(["/api/user"], null);
+      window.location.href = "/auth-page";
+      
+      toast({
+        title: "Logout successful",
+        description: "You have been successfully logged out.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred. Please try again.",
         variant: "destructive",
       });
     },
@@ -90,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user.role === "patient") {
         window.location.href = "/patient-dashboard";
       } else if (user.role === "clinician") {
-        window.location.href = "/clinician-dashboard";
+        window.location.href = "/patient-directory";
       }
       
       toast({
@@ -101,102 +124,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: error.message || "Could not create account",
+        description: error.message || "Registration failed. Please try again.",
         variant: "destructive",
       });
     },
   });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Logout failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Session timeout settings
-  const INACTIVE_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-  
-  // Set up session timeout tracking
-  useEffect(() => {
-    if (!user) return; // Only track for logged-in users
-    
-    let inactivityTimer: number;
-    
-    // Function to reset the inactivity timer
-    const resetInactivityTimer = () => {
-      window.clearTimeout(inactivityTimer);
-      inactivityTimer = window.setTimeout(() => {
-        // Log user out after inactivity period
-        toast({
-          title: "Session expired",
-          description: "Your session has expired due to inactivity. Please log in again.",
-          variant: "default",
-        });
-        
-        // Use custom mutation for session timeout to track it specifically
-        // We'll send a different endpoint that will log this as a timeout rather than regular logout
-        const timeoutLogout = async () => {
-          try {
-            // Log this as a session timeout instead of normal logout
-            await apiRequest("POST", "/api/session-timeout");
-            // Then perform normal logout action
-            logoutMutation.mutate();
-          } catch (err) {
-            // If the timeout endpoint fails, still do the regular logout
-            logoutMutation.mutate();
-          }
-        };
-        
-        timeoutLogout();
-      }, INACTIVE_TIMEOUT);
-    };
-    
-    // Set initial timer
-    resetInactivityTimer();
-    
-    // Events to track user activity
-    const activityEvents = [
-      'mousedown', 'mousemove', 'keypress', 
-      'scroll', 'touchstart', 'click'
-    ];
-    
-    // Event listener for user activity
-    const handleUserActivity = () => {
-      resetInactivityTimer();
-    };
-    
-    // Add event listeners
-    activityEvents.forEach(event => {
-      document.addEventListener(event, handleUserActivity);
-    });
-    
-    // Clean up
-    return () => {
-      window.clearTimeout(inactivityTimer);
-      activityEvents.forEach(event => {
-        document.removeEventListener(event, handleUserActivity);
-      });
-    };
-  }, [user, toast, logoutMutation]);
 
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user,
         isLoading,
         error,
         loginMutation,
@@ -211,8 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }
