@@ -125,12 +125,14 @@ export default function AuthPage() {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: (data: z.infer<typeof loginSchema>) => 
-      apiRequest("/api/login", { method: "POST", data }),
+    mutationFn: async (data: z.infer<typeof loginSchema>) => {
+      const response = await apiRequest("POST", "/api/login", data);
+      return await response.json();
+    },
     onSuccess: (data) => {
       toast({
         title: "Login successful",
-        description: `Welcome back, ${data.firstName}!`,
+        description: `Welcome back, ${data.firstName || 'User'}!`,
       });
       navigate("/redirect");
     },
@@ -145,12 +147,14 @@ export default function AuthPage() {
 
   // Register mutation
   const registerMutation = useMutation({
-    mutationFn: (data: z.infer<typeof registerSchema>) => 
-      apiRequest("/api/register", { method: "POST", data }),
+    mutationFn: async (data: z.infer<typeof registerSchema>) => {
+      const response = await apiRequest("POST", "/api/register", data);
+      return await response.json();
+    },
     onSuccess: (data) => {
       toast({
         title: "Registration successful",
-        description: `Welcome, ${data.firstName}!`,
+        description: `Welcome, ${data.firstName || 'User'}!`,
       });
       navigate("/redirect");
     },
@@ -187,10 +191,7 @@ export default function AuthPage() {
     try {
       setIsResettingPassword(true);
       // Send password reset email
-      await apiRequest("/api/reset-password", { 
-        method: "POST", 
-        data: { email: resetEmail } 
-      });
+      await apiRequest("POST", "/api/reset-password", { email: resetEmail });
       
       setResetEmailSent(true);
       toast({
@@ -230,13 +231,10 @@ export default function AuthPage() {
     try {
       setIsResettingPassword(true);
       // Reset password
-      await apiRequest("/api/confirm-reset-password", { 
-        method: "POST", 
-        data: { 
-          email: resetEmail,
-          newPassword,
-          resetCode
-        } 
+      await apiRequest("POST", "/api/confirm-reset-password", { 
+        email: resetEmail,
+        newPassword,
+        resetCode
       });
       
       setShowPasswordResetConfirmDialog(false);
