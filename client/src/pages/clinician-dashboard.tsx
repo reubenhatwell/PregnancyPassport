@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Tabs, 
@@ -41,11 +41,13 @@ import ClinicalSummary from "@/components/clinician/clinical-summary";
 import ClinicalDecisionSupport from "@/components/clinician/clinical-decision-support";
 import DocumentationTemplates from "@/components/clinician/documentation-templates";
 
-export default function ClinicianDashboard() {
+export default function ClinicianDashboard(props: { params?: { patientId?: string } }) {
   const [selectedTab, setSelectedTab] = useState("dashboard");
-  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
+    props.params?.patientId ? parseInt(props.params.patientId) : null
+  );
   const [showAddPatientDialog, setShowAddPatientDialog] = useState(false);
-  const [showPatientDetail, setShowPatientDetail] = useState(false);
+  const [showPatientDetail, setShowPatientDetail] = useState(!!props.params?.patientId);
   
   // Get current clinician (user must be logged in as clinician to access this page)
   const { data: user } = useQuery<User>({
@@ -63,6 +65,16 @@ export default function ClinicianDashboard() {
     queryKey: ["/api/patients", selectedPatientId],
     enabled: !!selectedPatientId,
   });
+  
+  // Check if query params contain 'addPatient' trigger
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shouldAddPatient = params.get("addPatient");
+    
+    if (shouldAddPatient === "true") {
+      setShowAddPatientDialog(true);
+    }
+  }, []);
   
   // Handle patient selection
   const handlePatientSelect = (patientId: number) => {

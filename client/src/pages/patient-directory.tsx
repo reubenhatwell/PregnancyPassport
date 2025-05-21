@@ -44,7 +44,7 @@ export default function PatientDirectory() {
   const [filteredPatients, setFilteredPatients] = useState<User[]>([]);
   const [sortBy, setSortBy] = useState<string>("lastName"); // Default sort by last name
   const [trimesterFilter, setTrimesterFilter] = useState<string>("all");
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
   const { user } = useAuth();
   
   // Fetch the patients from the API
@@ -182,13 +182,13 @@ export default function PatientDirectory() {
   // Handle selecting a patient
   const handlePatientSelect = (patientId: number) => {
     // Navigate to patient profile or clinician dashboard for that patient
-    navigate(`/clinician-dashboard/${patientId}`);
+    setLocation(`/clinician-dashboard/${patientId}`);
   };
   
   // Handle adding a new patient
   const handleAddPatient = () => {
     // Navigate to add patient form or open modal
-    navigate('/add-patient');
+    setLocation('/clinician-dashboard?addPatient=true');
   };
   
   // Calculate pregnancy trimester (in a real app this would use actual pregnancy data)
