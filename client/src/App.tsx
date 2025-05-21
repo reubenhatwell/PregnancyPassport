@@ -18,6 +18,7 @@ import Education from "@/pages/education";
 import Settings from "@/pages/settings";
 import AntenatalRecord from "@/pages/antenatal-record";
 import ClinicianDashboard from "@/pages/clinician-dashboard";
+import PatientDirectory from "@/pages/patient-directory";
 import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
 
