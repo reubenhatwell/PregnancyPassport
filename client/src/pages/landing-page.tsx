@@ -128,8 +128,8 @@ export default function LandingPage() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <img src={logoImage} alt="Digital Pregnancy Passport Logo" className="h-10 w-auto" />
-                <span className="ml-2 text-xl font-bold text-gray-900">Digital Pregnancy Passport</span>
+                <img src={logoImage} alt="My Pregnancy Passport Logo" className="h-10 w-auto" />
+                <span className="ml-2 text-xl font-bold text-gray-900">My Pregnancy Passport</span>
               </div>
             </div>
             
@@ -328,7 +328,7 @@ export default function LandingPage() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <h3 className="text-2xl font-semibold text-gray-900 mb-4">For Expecting Parents</h3>
                   <p className="text-lg text-gray-700 mb-6">
-                    The Digital Pregnancy Passport provides expecting parents with a comprehensive tool to manage 
+                    My Pregnancy Passport provides expecting parents with a comprehensive tool to manage 
                     your pregnancy journey. Track appointments, monitor health metrics, and stay connected with 
                     your healthcare team all in one secure place.
                   </p>

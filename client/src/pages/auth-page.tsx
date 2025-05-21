@@ -266,7 +266,7 @@ export default function AuthPage() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight text-pink-700 flex items-center justify-center gap-2">
             <Heart className="h-6 w-6 text-pink-600" />
-            Pregnancy Care Portal
+            My Pregnancy Passport
           </CardTitle>
           <CardDescription className="text-muted-foreground">
             Access your pregnancy care information securely
