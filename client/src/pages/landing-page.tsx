@@ -519,7 +519,7 @@ export default function LandingPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Getting started with the Digital Pregnancy Passport is simple and straightforward.
+                Getting started with My Pregnancy Passport is simple and straightforward.
               </p>
             </div>
             
@@ -637,7 +637,7 @@ export default function LandingPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
               <p className="text-lg text-gray-600">
-                Find answers to common questions about the Digital Pregnancy Passport
+                Find answers to common questions about My Pregnancy Passport
               </p>
             </div>
             
@@ -658,7 +658,7 @@ export default function LandingPage() {
               />
               
               <FAQItem 
-                question="Is the Digital Pregnancy Passport replacing paper records?"
+                question="Is My Pregnancy Passport replacing paper records?"
                 answer="While we aim to reduce reliance on paper records, we work alongside existing systems. Many healthcare providers will accept our digital records."
               />
               
@@ -668,8 +668,8 @@ export default function LandingPage() {
               />
               
               <FAQItem 
-                question="How much does it cost to use the Digital Pregnancy Passport?"
-                answer="The basic Digital Pregnancy Passport is available at no cost to all Australian residents. Premium features may be available for a subscription fee."
+                question="How much does it cost to use My Pregnancy Passport?"
+                answer="The basic My Pregnancy Passport is available at no cost to all Australian residents. Premium features may be available for a subscription fee."
               />
             </div>
             
@@ -758,7 +758,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Digital Pregnancy Passport</h3>
+              <h3 className="text-lg font-semibold mb-4">My Pregnancy Passport</h3>
               <p className="text-gray-400">
                 Australia's first comprehensive digital platform for pregnancy health records.
               </p>
@@ -819,7 +819,7 @@ export default function LandingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between">
-            <p className="text-gray-400">© 2025 Digital Pregnancy Passport. All rights reserved.</p>
+            <p className="text-gray-400">© 2025 My Pregnancy Passport. All rights reserved.</p>
             <div className="mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-pink-300 mr-4">Accessibility</a>
               <a href="#" className="text-gray-400 hover:text-pink-300 mr-4">Sitemap</a>
