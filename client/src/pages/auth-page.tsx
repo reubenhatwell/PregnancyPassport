@@ -135,9 +135,15 @@ export default function AuthPage() {
         description: `Welcome back, ${data.firstName || 'User'}!`,
       });
       
-      // Force a direct redirect by adding a small delay
+      // Force a direct redirect with role-based routing
       setTimeout(() => {
-        window.location.href = "/redirect";
+        // Direct clinicians straight to patient directory
+        if (data.role === "clinician") {
+          window.location.href = "/patient-directory";
+        } else {
+          // Other roles use the standard redirect
+          window.location.href = "/redirect";
+        }
       }, 500);
     },
     onError: (error: any) => {
@@ -161,9 +167,15 @@ export default function AuthPage() {
         description: `Welcome, ${data.firstName || 'User'}!`,
       });
       
-      // Force a direct redirect by adding a small delay
+      // Force a direct redirect with role-based routing
       setTimeout(() => {
-        window.location.href = "/redirect";
+        // Direct clinicians straight to patient directory
+        if (data.role === "clinician") {
+          window.location.href = "/patient-directory";
+        } else {
+          // Other roles use the standard redirect
+          window.location.href = "/redirect";
+        }
       }, 500);
     },
     onError: (error: any) => {
