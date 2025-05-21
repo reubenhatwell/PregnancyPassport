@@ -33,7 +33,7 @@ const AntenatalRecordWrapper = () => <AntenatalRecord />;
 const MessagesWrapper = () => <Messages />;
 const EducationWrapper = () => <Education />;
 const SettingsWrapper = () => <Settings />;
-const ClinicianDashboardWrapper = () => <ClinicianDashboard />;
+const ClinicianDashboardWrapper = (props: any) => <ClinicianDashboard {...props} />;
 const PatientDirectoryWrapper = () => <PatientDirectory />;
 const RedirectPageWrapper = () => <RedirectPage />;
 const AdminPageWrapper = () => <AdminPage />; 
@@ -98,17 +98,19 @@ function Router() {
       />
       
       {/* Clinician routes with proper access controls */}
-      <Route path="/patient-directory" component={PatientDirectoryWrapper} />
+      <ProtectedRoute 
+        path="/patient-directory" 
+        component={PatientDirectoryWrapper}
+        allowedRoles={["clinician", "admin"]}
+      />
       <ProtectedRoute 
         path="/clinician-dashboard" 
         component={ClinicianDashboardWrapper} 
         allowedRoles={["clinician", "admin"]}
       />
-      <Route 
-        path="/clinician-dashboard/:patientId" 
-        component={({ params }) => (
-          <ClinicianDashboard patientId={params?.patientId} />
-        )} 
+      <Route
+        path="/clinician-dashboard/:patientId"
+        component={({ params }) => <ClinicianDashboard patientId={params?.patientId} />}
       />
       <ProtectedRoute 
         path="/clinician" 
