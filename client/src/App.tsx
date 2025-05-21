@@ -43,7 +43,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={Settings} />
       
       {/* Clinician routes */}
-      <ProtectedRoute path="/patient-directory" component={PatientDirectory} />
+      <Route path="/patient-directory" component={PatientDirectory} />
       <ProtectedRoute path="/clinician-dashboard" component={ClinicianDashboard} />
       <ProtectedRoute path="/clinician-dashboard/:patientId" component={ClinicianDashboard} />
       <ProtectedRoute path="/clinician" component={RedirectPage} />
