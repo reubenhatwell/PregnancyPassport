@@ -16,16 +16,23 @@ export default function RedirectPage() {
   useEffect(() => {
     // Only redirect once we have the user data and have confirmed they're logged in
     if (!isLoading && user) {
+      console.log("Redirecting user with role:", user.role);
+      
       if (user.role === "patient") {
-        navigate("/patient-dashboard", { replace: true });
+        console.log("Patient detected - redirecting to patient dashboard");
+        // Use window.location for a full page refresh to ensure clean state
+        window.location.href = "/patient-dashboard";
       } else if (user.role === "clinician") {
-        navigate("/patient-directory", { replace: true });
+        console.log("Clinician detected - redirecting to patient directory");
+        window.location.href = "/patient-directory";
       } else {
         // Default fallback
-        navigate("/", { replace: true });
+        console.log("Unknown role - redirecting to home");
+        window.location.href = "/";
       }
     } else if (!isLoading && !user) {
       // If not logged in, redirect to login page
+      console.log("User not logged in - redirecting to auth page");
       navigate("/auth-page", { replace: true });
     }
   }, [user, isLoading, navigate]);
