@@ -229,17 +229,37 @@ export default function PatientDirectory() {
     return missedAppointments.length > 0;
   };
   
+  const { logoutMutation } = useAuth();
+  
+  const handleSignOut = () => {
+    logoutMutation.mutate();
+  };
+  
   return (
     <div className="container py-6">
       <div className="flex flex-col gap-6">
-        {/* Header and Greeting */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-heading font-semibold text-primary">Patient Directory</h1>
-          <p className="text-foreground/70">
-            {user && `Welcome, ${user.firstName}. You have ${filteredPatients.length} patients in your care.`}
-          </p>
-          <Separator className="mt-2 bg-primary/10" />
+        {/* Header and Greeting with Sign Out Button */}
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-heading font-semibold text-primary">Patient Directory</h1>
+            <p className="text-foreground/70">
+              {user && `Welcome, ${user.firstName}. You have ${filteredPatients.length} patients in your care.`}
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut}
+            className="flex items-center gap-2 border-pink-200 hover:bg-pink-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sign Out
+          </Button>
         </div>
+        <Separator className="bg-primary/10" />
         
         {/* Search and Filter Controls */}
         <Card className="bg-card">
