@@ -11,6 +11,7 @@ import {
   insertTestResultSchema,
   insertScanSchema,
   insertMessageSchema,
+  insertPatientVisitSchema,
   users
 } from "@shared/schema";
 
@@ -503,6 +504,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching education modules:", error);
       return res.status(500).send("Error fetching education modules");
+    }
+  });
+
+  // Patient Visit routes
+  app.get("/api/patient-visits", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      let pregnancyId: number;
+      
+      if (req.user.role === "patient") {
+        const pregnancy = await storage.getPregnancyByPatientId(req.user.id);
+        if (!pregnancy) return res.status(404).send("No pregnancy record found");
+        pregnancyId = pregnancy.id;
+      } else {
+        // For clinicians, require a pregnancyId parameter
+        pregnancyId = parseInt(req.query.pregnancyId as string);
+        if (isNaN(pregnancyId)) return res.status(400).send("Valid pregnancyId required");
+      }
+      
+      const visits = await storage.getPatientVisitsByPregnancyId(pregnancyId);
+      return res.json(visits);
+    } catch (error) {
+      console.error("Error fetching patient visits:", error);
+      return res.status(500).send("Error fetching patient visits");
+    }
+  });
+
+  app.post("/api/patient-visits", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const validatedData = insertPatientVisitSchema.parse(req.body);
+      
+      // Check if user has access to this pregnancy
+      if (req.user.role === "patient") {
+        const pregnancy = await storage.getPregnancy(validatedData.pregnancyId);
+        if (!pregnancy || pregnancy.patientId !== req.user.id) {
+          return res.status(403).send("You don't have access to this pregnancy");
+        }
+      }
+      
+      const visit = await storage.createPatientVisit(validatedData);
+      return res.status(201).json(visit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json(error.errors);
+      }
+      console.error("Error creating patient visit:", error);
+      return res.status(500).send("Error creating patient visit");
+    }
+  });
+
+  app.put("/api/patient-visits/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const visitId = parseInt(req.params.id);
+      if (isNaN(visitId)) return res.status(400).send("Valid visit ID required");
+      
+      const existingVisit = await storage.getPatientVisit(visitId);
+      if (!existingVisit) return res.status(404).send("Visit not found");
+      
+      // Check if user has access to this pregnancy
+      if (req.user.role === "patient") {
+        const pregnancy = await storage.getPregnancy(existingVisit.pregnancyId);
+        if (!pregnancy || pregnancy.patientId !== req.user.id) {
+          return res.status(403).send("You don't have access to this visit");
+        }
+      }
+      
+      const validatedData = insertPatientVisitSchema.partial().parse(req.body);
+      const updatedVisit = await storage.updatePatientVisit(visitId, validatedData);
+      
+      if (!updatedVisit) return res.status(404).send("Visit not found");
+      return res.json(updatedVisit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json(error.errors);
+      }
+      console.error("Error updating patient visit:", error);
+      return res.status(500).send("Error updating patient visit");
+    }
+  });
+
+  app.delete("/api/patient-visits/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const visitId = parseInt(req.params.id);
+      if (isNaN(visitId)) return res.status(400).send("Valid visit ID required");
+      
+      const existingVisit = await storage.getPatientVisit(visitId);
+      if (!existingVisit) return res.status(404).send("Visit not found");
+      
+      // Check if user has access to this pregnancy
+      if (req.user.role === "patient") {
+        const pregnancy = await storage.getPregnancy(existingVisit.pregnancyId);
+        if (!pregnancy || pregnancy.patientId !== req.user.id) {
+          return res.status(403).send("You don't have access to this visit");
+        }
+      }
+      
+      const deleted = await storage.deletePatientVisit(visitId);
+      if (!deleted) return res.status(404).send("Visit not found");
+      
+      return res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting patient visit:", error);
+      return res.status(500).send("Error deleting patient visit");
     }
   });
 

@@ -164,6 +164,7 @@ export class MemStorage implements IStorage {
     this.scanIdCounter = 1;
     this.messageIdCounter = 1;
     this.educationModuleIdCounter = 1;
+    this.patientVisitIdCounter = 1;
     this.securityLogIdCounter = 1;
     this.dataConsentIdCounter = 1;
     
@@ -973,6 +974,46 @@ export class MemStorage implements IStorage {
     });
     
     this.educationModuleIdCounter = modules.length + 1;
+  }
+
+  // Patient Visit operations
+  async getPatientVisit(id: number): Promise<PatientVisit | undefined> {
+    return this.patientVisits.get(id);
+  }
+
+  async getPatientVisitsByPregnancyId(pregnancyId: number): Promise<PatientVisit[]> {
+    return Array.from(this.patientVisits.values())
+      .filter(visit => visit.pregnancyId === pregnancyId)
+      .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime());
+  }
+
+  async createPatientVisit(visit: InsertPatientVisit): Promise<PatientVisit> {
+    const newVisit: PatientVisit = {
+      ...visit,
+      id: this.patientVisitIdCounter++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.patientVisits.set(newVisit.id, newVisit);
+    return newVisit;
+  }
+
+  async updatePatientVisit(id: number, visitUpdate: Partial<PatientVisit>): Promise<PatientVisit | undefined> {
+    const existingVisit = this.patientVisits.get(id);
+    if (!existingVisit) return undefined;
+
+    const updatedVisit: PatientVisit = {
+      ...existingVisit,
+      ...visitUpdate,
+      id,
+      updatedAt: new Date(),
+    };
+    this.patientVisits.set(id, updatedVisit);
+    return updatedVisit;
+  }
+
+  async deletePatientVisit(id: number): Promise<boolean> {
+    return this.patientVisits.delete(id);
   }
 }
 

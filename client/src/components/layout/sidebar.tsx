@@ -13,7 +13,8 @@ import {
   Settings,
   User,
   UserRound,
-  LogOut
+  LogOut,
+  Stethoscope
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
