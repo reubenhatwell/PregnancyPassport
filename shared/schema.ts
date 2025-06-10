@@ -360,6 +360,24 @@ export const insertDataConsentSchema = createInsertSchema(dataConsents).omit({
   id: true,
 });
 
+// Patient Visits Schema
+export const patientVisits = pgTable("patient_visits", {
+  id: serial("id").primaryKey(),
+  pregnancyId: integer("pregnancy_id").notNull().references(() => pregnancies.id),
+  visitDate: date("visit_date").notNull(),
+  doctorName: text("doctor_name").notNull(),
+  visitLocation: text("visit_location").notNull(),
+  visitNotes: text("visit_notes").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPatientVisitSchema = createInsertSchema(patientVisits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Export Types
 export type EducationModule = typeof educationModules.$inferSelect;
 export type InsertEducationModule = z.infer<typeof insertEducationModuleSchema>;
@@ -378,3 +396,6 @@ export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
 
 export type DataConsent = typeof dataConsents.$inferSelect;
 export type InsertDataConsent = z.infer<typeof insertDataConsentSchema>;
+
+export type PatientVisit = typeof patientVisits.$inferSelect;
+export type InsertPatientVisit = z.infer<typeof insertPatientVisitSchema>;

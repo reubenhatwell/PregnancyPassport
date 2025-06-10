@@ -28,7 +28,10 @@ import {
   InsertSecurityLog,
   dataConsents,
   DataConsent,
-  InsertDataConsent
+  InsertDataConsent,
+  patientVisits,
+  PatientVisit,
+  InsertPatientVisit
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -92,6 +95,13 @@ export interface IStorage {
   getAllEducationModules(): Promise<EducationModule[]>;
   createEducationModule(module: InsertEducationModule): Promise<EducationModule>;
   
+  // Patient Visit operations
+  getPatientVisit(id: number): Promise<PatientVisit | undefined>;
+  getPatientVisitsByPregnancyId(pregnancyId: number): Promise<PatientVisit[]>;
+  createPatientVisit(visit: InsertPatientVisit): Promise<PatientVisit>;
+  updatePatientVisit(id: number, visitUpdate: Partial<PatientVisit>): Promise<PatientVisit | undefined>;
+  deletePatientVisit(id: number): Promise<boolean>;
+  
   // Initialize methods for demo data
   initializeUsers(): void;
   initializePregnancies(): void;
@@ -115,6 +125,7 @@ export class MemStorage implements IStorage {
   private scans: Map<number, Scan>;
   private messages: Map<number, Message>;
   private educationModules: Map<number, EducationModule>;
+  private patientVisits: Map<number, PatientVisit>;
   private securityLogs: Map<number, SecurityLog>;
   private dataConsents: Map<number, DataConsent>;
   
@@ -128,6 +139,7 @@ export class MemStorage implements IStorage {
   private scanIdCounter: number;
   private messageIdCounter: number;
   private educationModuleIdCounter: number;
+  private patientVisitIdCounter: number;
   private securityLogIdCounter: number;
   private dataConsentIdCounter: number;
 
@@ -140,6 +152,7 @@ export class MemStorage implements IStorage {
     this.scans = new Map();
     this.messages = new Map();
     this.educationModules = new Map();
+    this.patientVisits = new Map();
     this.securityLogs = new Map();
     this.dataConsents = new Map();
     
