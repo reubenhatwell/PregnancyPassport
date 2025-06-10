@@ -147,6 +147,9 @@ export default function LandingPage() {
               <a href="#privacy" className="text-gray-700 hover:text-pink-500 px-3 py-2 rounded-md text-sm font-medium">
                 Privacy
               </a>
+              <a href="mailto:support@mypregnancypassport.com" className="text-gray-700 hover:text-pink-500 px-3 py-2 rounded-md text-sm font-medium">
+                Contact Support
+              </a>
               <Button
                 onClick={() => navigate("/auth-page")}
                 variant="outline"
@@ -208,6 +211,13 @@ export default function LandingPage() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Privacy
+            </a>
+            <a
+              href="mailto:support@mypregnancypassport.com"
+              className="text-gray-700 hover:bg-gray-50 hover:text-pink-500 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact Support
             </a>
             <div className="flex space-x-2 px-3 pt-2">
               <Button

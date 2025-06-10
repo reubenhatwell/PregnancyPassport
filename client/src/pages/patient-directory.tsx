@@ -27,7 +27,8 @@ import {
   Clock,
   AlertTriangle,
   RefreshCcw,
-  UserCircle2
+  UserCircle2,
+  MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -246,18 +247,29 @@ export default function PatientDirectory() {
               {user && `Welcome, ${user.firstName}. You have ${filteredPatients.length} patients in your care.`}
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-            className="flex items-center gap-2 border-pink-200 hover:bg-pink-50"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => window.open('mailto:support@mypregnancypassport.com', '_blank')}
+              className="flex items-center gap-2 text-gray-600 hover:text-pink-500"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Contact Support
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="flex items-center gap-2 border-pink-200 hover:bg-pink-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Sign Out
+            </Button>
+          </div>
         </div>
         <Separator className="bg-primary/10" />
         

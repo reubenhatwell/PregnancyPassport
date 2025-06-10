@@ -84,6 +84,10 @@ export default function Header({ userName, gestationWeeks }: HeaderProps) {
                 <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10" onClick={() => window.location.href = "/settings"}>
                   Profile Settings
                 </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10" onClick={() => window.open('mailto:support@mypregnancypassport.com', '_blank')}>
+                  Contact Support
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10" onClick={handleLogout}>
                   Logout
                 </DropdownMenuItem>
