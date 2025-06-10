@@ -19,6 +19,7 @@ import Settings from "@/pages/settings";
 import AntenatalRecord from "@/pages/antenatal-record";
 import ClinicianDashboard from "@/pages/clinician-dashboard";
 import PatientDirectory from "@/pages/patient-directory";
+import PatientVisits from "@/pages/patient-visits";
 import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
 import RedirectPage from "@/pages/redirect-page";
@@ -35,6 +36,7 @@ const EducationWrapper = () => <Education />;
 const SettingsWrapper = () => <Settings />;
 const ClinicianDashboardWrapper = (props: any) => <ClinicianDashboard {...props} />;
 const PatientDirectoryWrapper = () => <PatientDirectory />;
+const PatientVisitsWrapper = () => <PatientVisits />;
 const RedirectPageWrapper = () => <RedirectPage />;
 const AdminPageWrapper = () => <AdminPage />; 
 
@@ -79,6 +81,11 @@ function Router() {
       <ProtectedRoute 
         path="/antenatal-record" 
         component={AntenatalRecordWrapper} 
+        allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/patient-visits" 
+        component={PatientVisitsWrapper} 
         allowedRoles={["patient"]}
       />
       <ProtectedRoute 

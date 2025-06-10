@@ -48,8 +48,9 @@ export default function PatientVisits() {
   const addVisitMutation = useMutation({
     mutationFn: async (data: VisitFormData) => {
       if (!pregnancy?.id) throw new Error("No pregnancy record found");
-      return apiRequest(`/api/patient-visits`, {
+      return apiRequest("/api/patient-visits", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, pregnancyId: pregnancy.id }),
       });
     },
@@ -66,6 +67,7 @@ export default function PatientVisits() {
       if (!selectedVisit) throw new Error("No visit selected");
       return apiRequest(`/api/patient-visits/${selectedVisit.id}`, {
         method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
     },

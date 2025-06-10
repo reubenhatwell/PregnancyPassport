@@ -69,6 +69,12 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       icon: FileText,
     },
     {
+      name: "patient-visits",
+      label: "Patient Visits",
+      path: "/patient-visits",
+      icon: Stethoscope,
+    },
+    {
       name: "messages",
       label: "Messages",
       path: "/messages",
