@@ -31,7 +31,7 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
     logoutMutation.mutate();
   };
 
-  const navItems = [
+  const patientNavItems = [
     {
       name: "dashboard",
       label: "Dashboard",
@@ -69,12 +69,6 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       icon: FileText,
     },
     {
-      name: "patient-visits",
-      label: "Patient Visits",
-      path: "/patient-visits",
-      icon: Stethoscope,
-    },
-    {
       name: "messages",
       label: "Messages",
       path: "/messages",
@@ -93,6 +87,35 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       icon: Settings,
     },
   ];
+
+  const clinicianNavItems = [
+    {
+      name: "patient-directory",
+      label: "Patient Directory",
+      path: "/patient-directory",
+      icon: User,
+    },
+    {
+      name: "patient-visits",
+      label: "Patient Visits",
+      path: "/patient-visits",
+      icon: Stethoscope,
+    },
+    {
+      name: "messages",
+      label: "Messages",
+      path: "/messages",
+      icon: MessageSquare,
+    },
+    {
+      name: "settings",
+      label: "Settings",
+      path: "/settings",
+      icon: Settings,
+    },
+  ];
+
+  const navItems = userRole === "patient" ? patientNavItems : clinicianNavItems;
 
   return (
     <div className="hidden md:flex md:flex-shrink-0">

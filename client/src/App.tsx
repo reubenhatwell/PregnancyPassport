@@ -86,7 +86,7 @@ function Router() {
       <ProtectedRoute 
         path="/patient-visits" 
         component={PatientVisitsWrapper} 
-        allowedRoles={["patient"]}
+        allowedRoles={["clinician", "admin"]}
       />
       <ProtectedRoute 
         path="/messages" 

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { apiRequest } from "@/lib/queryClient";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,85 +10,84 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Eye, Edit2, Trash2, Calendar, MapPin, User, FileText } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Eye, Edit2, Trash2, Calendar, MapPin, User, FileText, Users } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertPatientVisitSchema, type PatientVisit } from "@shared/schema";
 
 // Form validation schema
-const visitFormSchema = insertPatientVisitSchema.extend({
+const visitFormSchema = z.object({
   visitDate: z.string().min(1, "Visit date is required"),
+  doctorName: z.string().min(1, "Doctor name is required"),
+  location: z.string().min(1, "Location is required"),
+  notes: z.string().min(1, "Visit notes are required"),
 });
 
 type VisitFormData = z.infer<typeof visitFormSchema>;
 
+// Mock patient visit interface
+interface PatientVisit {
+  id: number;
+  pregnancyId: number;
+  visitDate: string;
+  doctorName: string;
+  location: string;
+  notes: string;
+  createdAt: string;
+}
+
+// Mock patient interface
+interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export default function PatientVisits() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<PatientVisit | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
 
-  // Fetch patient visits
-  const { data: visits = [], isLoading } = useQuery<PatientVisit[]>({
-    queryKey: ["/api/patient-visits"],
-    enabled: !!user,
-  });
+  // Mock data for patients
+  const mockPatients: Patient[] = [
+    { id: 1, firstName: "Sarah", lastName: "Wilson", email: "sarah.wilson@email.com" },
+    { id: 2, firstName: "Emma", lastName: "Johnson", email: "emma.johnson@email.com" },
+    { id: 3, firstName: "Lisa", lastName: "Davis", email: "lisa.davis@email.com" },
+  ];
 
-  // Fetch pregnancy data to get pregnancyId
-  const { data: pregnancy } = useQuery({
-    queryKey: ["/api/pregnancy"],
-    enabled: !!user,
-  });
+  // Mock data for visits
+  const mockVisits: PatientVisit[] = [
+    {
+      id: 1,
+      pregnancyId: 1,
+      visitDate: "2025-01-08",
+      doctorName: "Dr. Sarah Mitchell",
+      location: "Royal Prince Alfred Hospital",
+      notes: "Regular checkup at 28 weeks. Blood pressure normal, baby's heartbeat strong. Discussed nutrition and exercise plan.",
+      createdAt: "2025-01-08T10:00:00Z"
+    },
+    {
+      id: 2,
+      pregnancyId: 1,
+      visitDate: "2024-12-15",
+      doctorName: "Dr. James Roberts",
+      location: "Sydney Children's Hospital",
+      notes: "20-week ultrasound scan completed. All measurements within normal range. Gender revealed as requested.",
+      createdAt: "2024-12-15T14:30:00Z"
+    },
+  ];
 
-  // Add visit mutation
-  const addVisitMutation = useMutation({
-    mutationFn: async (data: VisitFormData) => {
-      if (!pregnancy?.id) throw new Error("No pregnancy record found");
-      return apiRequest("/api/patient-visits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, pregnancyId: pregnancy.id }),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/patient-visits"] });
-      setIsAddDialogOpen(false);
-      addForm.reset();
-    },
-  });
-
-  // Edit visit mutation
-  const editVisitMutation = useMutation({
-    mutationFn: async (data: VisitFormData) => {
-      if (!selectedVisit) throw new Error("No visit selected");
-      return apiRequest(`/api/patient-visits/${selectedVisit.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/patient-visits"] });
-      setIsEditDialogOpen(false);
-      setSelectedVisit(null);
-      editForm.reset();
-    },
-  });
-
-  // Delete visit mutation
-  const deleteVisitMutation = useMutation({
-    mutationFn: async (visitId: number) => {
-      return apiRequest(`/api/patient-visits/${visitId}`, {
-        method: "DELETE",
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/patient-visits"] });
-    },
-  });
+  // Filter visits by selected patient
+  const filteredVisits = selectedPatientId 
+    ? mockVisits.filter(visit => visit.pregnancyId === parseInt(selectedPatientId))
+    : [];
 
   // Forms
   const addForm = useForm<VisitFormData>({
@@ -97,8 +95,8 @@ export default function PatientVisits() {
     defaultValues: {
       visitDate: "",
       doctorName: "",
-      visitLocation: "",
-      visitNotes: "",
+      location: "",
+      notes: "",
     },
   });
 
@@ -107,224 +105,241 @@ export default function PatientVisits() {
     defaultValues: {
       visitDate: "",
       doctorName: "",
-      visitLocation: "",
-      visitNotes: "",
+      location: "",
+      notes: "",
     },
   });
 
-  // Handle edit visit
+  // Event handlers
   const handleEditVisit = (visit: PatientVisit) => {
     setSelectedVisit(visit);
     editForm.reset({
       visitDate: visit.visitDate,
       doctorName: visit.doctorName,
-      visitLocation: visit.visitLocation,
-      visitNotes: visit.visitNotes,
+      location: visit.location,
+      notes: visit.notes,
     });
     setIsEditDialogOpen(true);
   };
 
-  // Handle view visit
   const handleViewVisit = (visit: PatientVisit) => {
     setSelectedVisit(visit);
     setIsViewDialogOpen(true);
   };
 
-  // Handle delete visit
-  const handleDeleteVisit = (visitId: number) => {
-    if (confirm("Are you sure you want to delete this visit record?")) {
-      deleteVisitMutation.mutate(visitId);
-    }
-  };
-
   const onAddSubmit = (data: VisitFormData) => {
-    addVisitMutation.mutate(data);
+    console.log("Adding visit:", data);
+    setIsAddDialogOpen(false);
+    addForm.reset();
   };
 
   const onEditSubmit = (data: VisitFormData) => {
-    editVisitMutation.mutate(data);
+    console.log("Editing visit:", data);
+    setIsEditDialogOpen(false);
+    setSelectedVisit(null);
+    editForm.reset();
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  const handleDeleteVisit = (visitId: number) => {
+    console.log("Deleting visit:", visitId);
+  };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Patient Visits</h1>
-          <p className="text-gray-600 mt-1">Track your medical appointments and visit notes</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Patient Visits</h1>
+          <p className="text-gray-600">Manage patient visit records and medical appointments</p>
         </div>
-        
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600">
-              <Plus className="h-4 w-4" />
-              Add Visit
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add New Visit</DialogTitle>
-              <DialogDescription>
-                Record details about your medical appointment or visit.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...addForm}>
-              <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
-                <FormField
-                  control={addForm.control}
-                  name="visitDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Visit Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addForm.control}
-                  name="doctorName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Doctor's Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Dr. Smith" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addForm.control}
-                  name="visitLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Visit Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Hospital, Clinic, or Practice name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addForm.control}
-                  name="visitNotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Visit Notes</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter details about your visit, diagnosis, treatment, recommendations..."
-                          className="min-h-[100px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={addVisitMutation.isPending}>
-                    {addVisitMutation.isPending ? "Saving..." : "Save Visit"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <Separator />
+      {/* Patient Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Select Patient
+          </CardTitle>
+          <CardDescription>Choose a patient to view their visit records</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a patient..." />
+            </SelectTrigger>
+            <SelectContent>
+              {mockPatients.map((patient) => (
+                <SelectItem key={patient.id} value={patient.id.toString()}>
+                  {patient.firstName} {patient.lastName} - {patient.email}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-      {/* Visits List */}
-      {visits.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No visits recorded yet</h3>
-            <p className="text-gray-500 mb-4 text-center">
-              Start tracking your medical visits by adding your first visit record.
-            </p>
-            <Button onClick={() => setIsAddDialogOpen(true)} className="bg-pink-500 hover:bg-pink-600">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Visit
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {visits.map((visit) => (
-            <Card key={visit.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-3">
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(visit.visitDate)}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <User className="h-3 w-3" />
-                        {visit.doctorName}
+      {/* Visits Section */}
+      {selectedPatientId && (
+        <>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">Visit Records</h2>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-rose-600 hover:bg-rose-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Visit
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Patient Visit</DialogTitle>
+                  <DialogDescription>
+                    Record details of a new patient visit or appointment.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...addForm}>
+                  <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                    <FormField
+                      control={addForm.control}
+                      name="visitDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Visit Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={addForm.control}
+                      name="doctorName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Doctor Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Dr. Jane Smith" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={addForm.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Royal Prince Alfred Hospital" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={addForm.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Visit Notes</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Details about the visit, observations, recommendations..." 
+                              className="min-h-[100px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setIsAddDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" className="bg-rose-600 hover:bg-rose-700">
+                        Add Visit
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Visits List */}
+          <div className="grid gap-4">
+            {filteredVisits.length === 0 ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No visit records</h3>
+                    <p className="text-gray-600">This patient doesn't have any recorded visits yet.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredVisits.map((visit) => (
+                <Card key={visit.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-rose-600" />
+                          {formatDate(visit.visitDate)}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-4 mt-2">
+                          <span className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {visit.doctorName}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {visit.location}
+                          </span>
+                        </CardDescription>
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <MapPin className="h-3 w-3" />
-                        {visit.visitLocation}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewVisit(visit)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditVisit(visit)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteVisit(visit.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <p className="text-gray-700 line-clamp-2">
-                      {visit.visitNotes}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewVisit(visit)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditVisit(visit)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteVisit(visit.id)}
-                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 line-clamp-3">{visit.notes}</p>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </>
       )}
 
       {/* View Visit Dialog */}
@@ -337,34 +352,21 @@ export default function PatientVisits() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Visit Date</label>
+                  <label className="text-sm font-medium text-gray-600">Visit Date</label>
                   <p className="text-gray-900">{formatDate(selectedVisit.visitDate)}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Doctor</label>
+                  <label className="text-sm font-medium text-gray-600">Doctor</label>
                   <p className="text-gray-900">{selectedVisit.doctorName}</p>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Location</label>
-                <p className="text-gray-900">{selectedVisit.visitLocation}</p>
+                <label className="text-sm font-medium text-gray-600">Location</label>
+                <p className="text-gray-900">{selectedVisit.location}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Visit Notes</label>
-                <div className="mt-1 p-3 bg-gray-50 rounded-md border">
-                  <p className="text-gray-900 whitespace-pre-wrap">{selectedVisit.visitNotes}</p>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                  Close
-                </Button>
-                <Button onClick={() => {
-                  setIsViewDialogOpen(false);
-                  handleEditVisit(selectedVisit);
-                }}>
-                  Edit Visit
-                </Button>
+                <label className="text-sm font-medium text-gray-600">Visit Notes</label>
+                <p className="text-gray-900 whitespace-pre-wrap">{selectedVisit.notes}</p>
               </div>
             </div>
           )}
@@ -373,11 +375,11 @@ export default function PatientVisits() {
 
       {/* Edit Visit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Visit</DialogTitle>
             <DialogDescription>
-              Update the details of your visit record.
+              Update the visit details below.
             </DialogDescription>
           </DialogHeader>
           <Form {...editForm}>
@@ -400,9 +402,9 @@ export default function PatientVisits() {
                 name="doctorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Doctor's Name</FormLabel>
+                    <FormLabel>Doctor Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Dr. Smith" {...field} />
+                      <Input placeholder="Dr. Jane Smith" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -410,12 +412,12 @@ export default function PatientVisits() {
               />
               <FormField
                 control={editForm.control}
-                name="visitLocation"
+                name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Visit Location</FormLabel>
+                    <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="Hospital, Clinic, or Practice name" {...field} />
+                      <Input placeholder="Royal Prince Alfred Hospital" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -423,27 +425,35 @@ export default function PatientVisits() {
               />
               <FormField
                 control={editForm.control}
-                name="visitNotes"
+                name="notes"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Visit Notes</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Enter details about your visit, diagnosis, treatment, recommendations..."
+                      <Textarea 
+                        placeholder="Details about the visit, observations, recommendations..." 
                         className="min-h-[100px]"
-                        {...field}
+                        {...field} 
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditDialogOpen(false);
+                    setSelectedVisit(null);
+                    editForm.reset();
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={editVisitMutation.isPending}>
-                  {editVisitMutation.isPending ? "Updating..." : "Update Visit"}
+                <Button type="submit" className="bg-rose-600 hover:bg-rose-700">
+                  Save Changes
                 </Button>
               </div>
             </form>
