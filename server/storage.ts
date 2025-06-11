@@ -31,7 +31,10 @@ import {
   InsertDataConsent,
   patientVisits,
   PatientVisit,
-  InsertPatientVisit
+  InsertPatientVisit,
+  immunisationHistory,
+  ImmunisationHistory,
+  InsertImmunisationHistory
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -101,6 +104,12 @@ export interface IStorage {
   createPatientVisit(visit: InsertPatientVisit): Promise<PatientVisit>;
   updatePatientVisit(id: number, visitUpdate: Partial<PatientVisit>): Promise<PatientVisit | undefined>;
   deletePatientVisit(id: number): Promise<boolean>;
+  
+  // Immunisation History operations
+  getImmunisationHistory(id: number): Promise<ImmunisationHistory | undefined>;
+  getImmunisationHistoryByPregnancyId(pregnancyId: number): Promise<ImmunisationHistory | undefined>;
+  createImmunisationHistory(history: InsertImmunisationHistory): Promise<ImmunisationHistory>;
+  updateImmunisationHistory(id: number, historyUpdate: Partial<ImmunisationHistory>): Promise<ImmunisationHistory | undefined>;
   
   // Initialize methods for demo data
   initializeUsers(): void;

@@ -38,6 +38,7 @@ const SettingsWrapper = () => <Settings />;
 const ClinicianDashboardWrapper = (props: any) => <ClinicianDashboard {...props} />;
 const PatientDirectoryWrapper = () => <PatientDirectory />;
 const PatientVisitsWrapper = () => <PatientVisits />;
+const ImmunisationHistoryWrapper = () => <ImmunisationHistory />;
 const RedirectPageWrapper = () => <RedirectPage />;
 const AdminPageWrapper = () => <AdminPage />; 
 
@@ -83,6 +84,11 @@ function Router() {
         path="/antenatal-record" 
         component={AntenatalRecordWrapper} 
         allowedRoles={["patient"]}
+      />
+      <ProtectedRoute 
+        path="/immunisation-history" 
+        component={ImmunisationHistoryWrapper} 
+        allowedRoles={["patient", "clinician", "admin"]}
       />
       <ProtectedRoute 
         path="/patient-visits" 
