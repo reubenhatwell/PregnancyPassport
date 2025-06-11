@@ -194,6 +194,7 @@ export class MemStorage implements IStorage {
     this.initializeScans();
     this.initializeMessages();
     this.initializeEducationModules();
+    this.initializeImmunisationHistory();
   }
 
   // User Operations
@@ -1063,6 +1064,35 @@ export class MemStorage implements IStorage {
     };
     this.immunisationHistory.set(id, updatedHistory);
     return updatedHistory;
+  }
+
+  initializeImmunisationHistory() {
+    // Add sample immunisation data for demo pregnancies
+    this.immunisationHistory.set(1, {
+      id: 1,
+      pregnancyId: 1,
+      fluDate: "2024-10-15",
+      covidDate: "2024-09-20",
+      whoopingCoughDate: "2024-11-05",
+      rsvDate: null,
+      antiDDate: "2024-12-10",
+      createdAt: new Date("2024-01-15"),
+      updatedAt: new Date("2024-12-10"),
+    });
+
+    this.immunisationHistory.set(2, {
+      id: 2,
+      pregnancyId: 2,
+      fluDate: "2024-09-10",
+      covidDate: "2024-08-15",
+      whoopingCoughDate: null,
+      rsvDate: "2024-11-20",
+      antiDDate: "2024-08-25",
+      createdAt: new Date("2024-01-20"),
+      updatedAt: new Date("2024-11-20"),
+    });
+
+    this.immunisationHistoryIdCounter = 3;
   }
 }
 
