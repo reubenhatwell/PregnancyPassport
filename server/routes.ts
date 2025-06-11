@@ -12,6 +12,7 @@ import {
   insertScanSchema,
   insertMessageSchema,
   insertPatientVisitSchema,
+  insertImmunisationHistorySchema,
   users
 } from "@shared/schema";
 

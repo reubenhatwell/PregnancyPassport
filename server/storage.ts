@@ -135,6 +135,7 @@ export class MemStorage implements IStorage {
   private messages: Map<number, Message>;
   private educationModules: Map<number, EducationModule>;
   private patientVisits: Map<number, PatientVisit>;
+  private immunisationHistory: Map<number, ImmunisationHistory>;
   private securityLogs: Map<number, SecurityLog>;
   private dataConsents: Map<number, DataConsent>;
   
@@ -149,6 +150,7 @@ export class MemStorage implements IStorage {
   private messageIdCounter: number;
   private educationModuleIdCounter: number;
   private patientVisitIdCounter: number;
+  private immunisationHistoryIdCounter: number;
   private securityLogIdCounter: number;
   private dataConsentIdCounter: number;
 
@@ -162,6 +164,7 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.educationModules = new Map();
     this.patientVisits = new Map();
+    this.immunisationHistory = new Map();
     this.securityLogs = new Map();
     this.dataConsents = new Map();
     
@@ -174,6 +177,7 @@ export class MemStorage implements IStorage {
     this.messageIdCounter = 1;
     this.educationModuleIdCounter = 1;
     this.patientVisitIdCounter = 1;
+    this.immunisationHistoryIdCounter = 1;
     this.securityLogIdCounter = 1;
     this.dataConsentIdCounter = 1;
     
@@ -1023,6 +1027,42 @@ export class MemStorage implements IStorage {
 
   async deletePatientVisit(id: number): Promise<boolean> {
     return this.patientVisits.delete(id);
+  }
+
+  // Immunisation History operations
+  async getImmunisationHistory(id: number): Promise<ImmunisationHistory | undefined> {
+    return this.immunisationHistory.get(id);
+  }
+
+  async getImmunisationHistoryByPregnancyId(pregnancyId: number): Promise<ImmunisationHistory | undefined> {
+    return Array.from(this.immunisationHistory.values())
+      .find(history => history.pregnancyId === pregnancyId);
+  }
+
+  async createImmunisationHistory(history: InsertImmunisationHistory): Promise<ImmunisationHistory> {
+    const id = this.immunisationHistoryIdCounter++;
+    const newHistory: ImmunisationHistory = {
+      ...history,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.immunisationHistory.set(id, newHistory);
+    return newHistory;
+  }
+
+  async updateImmunisationHistory(id: number, historyUpdate: Partial<ImmunisationHistory>): Promise<ImmunisationHistory | undefined> {
+    const existing = this.immunisationHistory.get(id);
+    if (!existing) return undefined;
+    
+    const updatedHistory: ImmunisationHistory = {
+      ...existing,
+      ...historyUpdate,
+      id,
+      updatedAt: new Date(),
+    };
+    this.immunisationHistory.set(id, updatedHistory);
+    return updatedHistory;
   }
 }
 
