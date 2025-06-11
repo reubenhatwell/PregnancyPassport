@@ -661,6 +661,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/immunisation-history/:id", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
     try {
       // Only clinicians can update immunisation history
       if (req.user.role !== "clinician") {
