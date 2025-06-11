@@ -378,6 +378,25 @@ export const insertPatientVisitSchema = createInsertSchema(patientVisits).omit({
   updatedAt: true,
 });
 
+// Immunisation History Schema
+export const immunisationHistory = pgTable("immunisation_history", {
+  id: serial("id").primaryKey(),
+  pregnancyId: integer("pregnancy_id").notNull().references(() => pregnancies.id),
+  fluDate: date("flu_date"),
+  covidDate: date("covid_date"),
+  whoopingCoughDate: date("whooping_cough_date"),
+  rsvDate: date("rsv_date"),
+  antiDDate: date("anti_d_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertImmunisationHistorySchema = createInsertSchema(immunisationHistory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Export Types
 export type EducationModule = typeof educationModules.$inferSelect;
 export type InsertEducationModule = z.infer<typeof insertEducationModuleSchema>;
@@ -399,3 +418,6 @@ export type InsertDataConsent = z.infer<typeof insertDataConsentSchema>;
 
 export type PatientVisit = typeof patientVisits.$inferSelect;
 export type InsertPatientVisit = z.infer<typeof insertPatientVisitSchema>;
+
+export type ImmunisationHistory = typeof immunisationHistory.$inferSelect;
+export type InsertImmunisationHistory = z.infer<typeof insertImmunisationHistorySchema>;

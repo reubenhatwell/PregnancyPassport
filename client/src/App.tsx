@@ -20,6 +20,7 @@ import AntenatalRecord from "@/pages/antenatal-record";
 import ClinicianDashboard from "@/pages/clinician-dashboard";
 import PatientDirectory from "@/pages/patient-directory";
 import PatientVisits from "@/pages/patient-visits";
+import ImmunisationHistory from "@/pages/immunisation-history";
 import AdminPage from "@/pages/admin-page";
 import NotFound from "@/pages/not-found";
 import RedirectPage from "@/pages/redirect-page";

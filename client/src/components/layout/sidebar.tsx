@@ -14,7 +14,8 @@ import {
   User,
   UserRound,
   LogOut,
-  Stethoscope
+  Stethoscope,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -69,6 +70,12 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       icon: FileText,
     },
     {
+      name: "immunisation-history",
+      label: "Immunisation History",
+      path: "/immunisation-history",
+      icon: Shield,
+    },
+    {
       name: "messages",
       label: "Messages",
       path: "/messages",
@@ -100,6 +107,12 @@ export default function Sidebar({ activePage, userRole }: SidebarProps) {
       label: "Patient Visits",
       path: "/patient-visits",
       icon: Stethoscope,
+    },
+    {
+      name: "immunisation-history",
+      label: "Immunisation History",
+      path: "/immunisation-history",
+      icon: Shield,
     },
     {
       name: "messages",
