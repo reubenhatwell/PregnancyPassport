@@ -620,6 +620,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Immunisation History routes
   app.get("/api/immunisation-history/pregnancy/:pregnancyId", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
     try {
       const pregnancyId = parseInt(req.params.pregnancyId);
       if (isNaN(pregnancyId)) return res.status(400).send("Invalid pregnancy ID");
@@ -641,6 +643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/immunisation-history", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
     try {
       // Only clinicians can create immunisation history
       if (req.user.role !== "clinician") {
