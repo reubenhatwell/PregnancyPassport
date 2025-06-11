@@ -618,6 +618,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Immunisation History routes
+  app.get("/api/immunisation-history/pregnancy/:pregnancyId", async (req: any, res) => {
+    try {
+      const pregnancyId = parseInt(req.params.pregnancyId);
+      if (isNaN(pregnancyId)) return res.status(400).send("Invalid pregnancy ID");
+
+      // Check if user has access to this pregnancy
+      if (req.user.role === "patient") {
+        const pregnancy = await storage.getPregnancy(pregnancyId);
+        if (!pregnancy || pregnancy.patientId !== req.user.id) {
+          return res.status(403).send("You don't have access to this pregnancy");
+        }
+      }
+
+      const history = await storage.getImmunisationHistoryByPregnancyId(pregnancyId);
+      return res.json(history || null);
+    } catch (error) {
+      console.error("Error fetching immunisation history:", error);
+      return res.status(500).send("Error fetching immunisation history");
+    }
+  });
+
+  app.post("/api/immunisation-history", async (req: any, res) => {
+    try {
+      // Only clinicians can create immunisation history
+      if (req.user.role !== "clinician") {
+        return res.status(403).send("Only clinicians can create immunisation history");
+      }
+
+      const validatedData = insertImmunisationHistorySchema.parse(req.body);
+      const history = await storage.createImmunisationHistory(validatedData);
+      return res.status(201).json(history);
+    } catch (error) {
+      console.error("Error creating immunisation history:", error);
+      return res.status(500).send("Error creating immunisation history");
+    }
+  });
+
+  app.patch("/api/immunisation-history/:id", async (req: any, res) => {
+    try {
+      // Only clinicians can update immunisation history
+      if (req.user.role !== "clinician") {
+        return res.status(403).send("Only clinicians can update immunisation history");
+      }
+
+      const historyId = parseInt(req.params.id);
+      if (isNaN(historyId)) return res.status(400).send("Invalid history ID");
+
+      const existingHistory = await storage.getImmunisationHistory(historyId);
+      if (!existingHistory) return res.status(404).send("Immunisation history not found");
+
+      const validatedData = insertImmunisationHistorySchema.partial().parse(req.body);
+      const updatedHistory = await storage.updateImmunisationHistory(historyId, validatedData);
+      
+      if (!updatedHistory) return res.status(404).send("Immunisation history not found");
+      return res.json(updatedHistory);
+    } catch (error) {
+      console.error("Error updating immunisation history:", error);
+      return res.status(500).send("Error updating immunisation history");
+    }
+  });
+
   // Create HTTP server
   // Admin route for account cleanup (delete all accounts)
   // CAUTION: This endpoint will delete all user accounts and associated data

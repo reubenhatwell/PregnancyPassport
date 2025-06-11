@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Syringe, Save, Users } from "lucide-react";
+import { Shield, Syringe, Save, Users, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 // Mock immunisation data interface
 interface ImmunisationData {
@@ -47,39 +48,46 @@ export default function ImmunisationHistory() {
   const isClinicianView = user?.role === "clinician" || user?.role === "admin";
   const isReadOnly = user?.role === "patient";
 
-  // Mock data for patients (clinician view)
-  const mockPatients: Patient[] = [
-    { id: 1, firstName: "Sarah", lastName: "Wilson", email: "sarah.wilson@email.com" },
-    { id: 2, firstName: "Emma", lastName: "Johnson", email: "emma.johnson@email.com" },
-    { id: 3, firstName: "Lisa", lastName: "Davis", email: "lisa.davis@email.com" },
-  ];
+  // Get patients for clinician view
+  const { data: patients = [], isLoading: isLoadingPatients } = useQuery({
+    queryKey: ["/api/patients"],
+    enabled: isClinicianView,
+  });
 
-  // Mock immunisation data
-  const mockImmunisationData: ImmunisationData = {
-    id: 1,
-    pregnancyId: 1,
-    fluDate: "2024-10-15",
-    covidDate: "2024-09-20",
-    whoopingCoughDate: "2024-11-05",
-    rsvDate: null,
-    antiDDate: "2024-12-10",
-  };
+  // Get pregnancy data for selected patient (clinician) or current user (patient)
+  const { data: pregnancy, isLoading: isLoadingPregnancy } = useQuery({
+    queryKey: selectedPatientId ? ["/api/pregnancies/patient", selectedPatientId] : ["/api/pregnancies/user"],
+    enabled: isClinicianView ? !!selectedPatientId : !!user,
+  });
 
-  // Initialize form data based on selected patient or current user
-  const currentData = selectedPatientId || !isClinicianView ? mockImmunisationData : null;
+  // Get immunisation history for the pregnancy
+  const { data: immunisationData, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ["/api/immunisation-history", pregnancy?.id],
+    queryFn: () => apiRequest(`/api/immunisation-history/pregnancy/${pregnancy?.id}`),
+    enabled: !!pregnancy?.id,
+  });
 
-  // Update form data when patient selection changes or data loads
+  // Initialize form data when immunisation data loads
   useState(() => {
-    if (currentData) {
+    if (immunisationData) {
       setFormData({
-        fluDate: currentData.fluDate,
-        covidDate: currentData.covidDate,
-        whoopingCoughDate: currentData.whoopingCoughDate,
-        rsvDate: currentData.rsvDate,
-        antiDDate: currentData.antiDDate,
+        fluDate: immunisationData.fluDate,
+        covidDate: immunisationData.covidDate,
+        whoopingCoughDate: immunisationData.whoopingCoughDate,
+        rsvDate: immunisationData.rsvDate,
+        antiDDate: immunisationData.antiDDate,
+      });
+    } else {
+      // Initialize with empty form if no data exists
+      setFormData({
+        fluDate: null,
+        covidDate: null,
+        whoopingCoughDate: null,
+        rsvDate: null,
+        antiDDate: null,
       });
     }
-  });
+  }, [immunisationData]);
 
   const handleInputChange = (field: keyof ImmunisationData, value: string) => {
     if (isReadOnly) return;
@@ -90,14 +98,60 @@ export default function ImmunisationHistory() {
     }));
   };
 
+  // Mutation for creating immunisation history
+  const createMutation = useMutation({
+    mutationFn: (data: Partial<ImmunisationData>) =>
+      apiRequest("/api/immunisation-history", {
+        method: "POST",
+        body: JSON.stringify({ ...data, pregnancyId: pregnancy?.id }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/immunisation-history", pregnancy?.id] });
+      toast({
+        title: "Immunisation History Created",
+        description: "The immunisation records have been successfully created.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create immunisation history. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation for updating immunisation history
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<ImmunisationData>) =>
+      apiRequest(`/api/immunisation-history/${immunisationData?.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/immunisation-history", pregnancy?.id] });
+      toast({
+        title: "Immunisation History Updated",
+        description: "The immunisation records have been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update immunisation history. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSave = () => {
     if (isReadOnly) return;
     
-    console.log("Saving immunisation data:", formData);
-    toast({
-      title: "Immunisation History Updated",
-      description: "The immunisation records have been successfully saved.",
-    });
+    if (immunisationData?.id) {
+      updateMutation.mutate(formData);
+    } else {
+      createMutation.mutate(formData);
+    }
   };
 
   const immunisationFields = [
