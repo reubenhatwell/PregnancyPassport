@@ -35,7 +35,9 @@ const AntenatalRecordWrapper = () => <AntenatalRecord />;
 const MessagesWrapper = () => <Messages />;
 const EducationWrapper = () => <Education />;
 const SettingsWrapper = () => <Settings />;
-const ClinicianDashboardWrapper = (props: any) => <ClinicianDashboard {...props} />;
+const ClinicianDashboardWrapper = (props?: any) => <ClinicianDashboard {...props} />;
+const ClinicianDashboardWithPatientWrapper = (props: { params?: { patientId?: string } }) => 
+  <ClinicianDashboard params={{ patientId: props.params?.patientId }} />;
 const PatientDirectoryWrapper = () => <PatientDirectory />;
 const PatientVisitsWrapper = () => <PatientVisits />;
 const ImmunisationHistoryWrapper = () => <ImmunisationHistory />;
@@ -122,9 +124,10 @@ function Router() {
         component={ClinicianDashboardWrapper} 
         allowedRoles={["clinician", "admin"]}
       />
-      <Route
+      <ProtectedRoute
         path="/clinician-dashboard/:patientId"
-        component={({ params }) => <ClinicianDashboard patientId={params?.patientId} />}
+        component={ClinicianDashboardWithPatientWrapper}
+        allowedRoles={["clinician", "admin"]}
       />
       <ProtectedRoute 
         path="/clinician" 
