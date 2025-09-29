@@ -228,7 +228,8 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
       {/* Main Content */}
       <div className="flex-1 overflow-auto bg-gray-50">
         <div className="p-6">
-          <TabsContent value="dashboard" className={selectedTab === "dashboard" ? "block" : "hidden"}>
+          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsContent value="dashboard" className={selectedTab === "dashboard" ? "block" : "hidden"}>
             <h1 className="text-2xl font-bold mb-6">Clinician Dashboard</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -390,6 +391,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
               </CardContent>
             </Card>
           </TabsContent>
+          </Tabs>
         </div>
       </div>
       

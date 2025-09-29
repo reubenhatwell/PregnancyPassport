@@ -449,6 +449,18 @@ export class MemStorage implements IStorage {
       role: "patient" as const
     };
     this.users.set(patient2.id, patient2);
+    
+    // Create beta testing clinician (password: Clinitian1!)
+    const betaClinician = {
+      id: this.userIdCounter++,
+      username: "clinitian1",
+      password: "5640f2d6163358b906a273592021b5ec44d37b64f69bcb918a03d436e77ac2ff7cf219cd1f64a2f544ed272fcf38ae4eedd2f8a45b470e161194cad5899bb040.319223de532312449a70ac1b347ba80c",
+      email: "clinitian1@test.com",
+      firstName: "Beta",
+      lastName: "Clinician",
+      role: "clinician" as const
+    };
+    this.users.set(betaClinician.id, betaClinician);
   }
   
   initializePregnancies() {
