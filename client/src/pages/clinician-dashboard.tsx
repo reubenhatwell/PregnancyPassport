@@ -197,7 +197,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
                   <CardTitle className="text-sm font-medium text-gray-500">Total Patients</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.patientCount || "15"}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.patientCount || "15"}</div>
                 </CardContent>
               </Card>
               
@@ -206,7 +206,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
                   <CardTitle className="text-sm font-medium text-gray-500">Today's Appointments</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.appointmentsToday || "3"}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.appointmentsToday || "3"}</div>
                 </CardContent>
               </Card>
               
@@ -215,7 +215,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
                   <CardTitle className="text-sm font-medium text-gray-500">Pending Test Results</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.pendingTestResults || "4"}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.pendingTestResults || "4"}</div>
                 </CardContent>
               </Card>
               
@@ -224,7 +224,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
                   <CardTitle className="text-sm font-medium text-gray-500">New Alerts</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.alertsCount || "2"}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.alertsCount || "2"}</div>
                 </CardContent>
               </Card>
             </div>
@@ -255,16 +255,16 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center">
-                        <div className="bg-blue-100 h-4 rounded" style={{width: `${(stats?.patientsByTrimester?.first / stats?.patientCount * 100) || 25}%`}} />
-                        <span className="ml-2 text-sm">First: {stats?.patientsByTrimester?.first || 4}</span>
+                        <div className="bg-blue-100 h-4 rounded" style={{width: `${((stats as any)?.patientsByTrimester?.first / (stats as any)?.patientCount * 100) || 25}%`}} />
+                        <span className="ml-2 text-sm">First: {(stats as any)?.patientsByTrimester?.first || 4}</span>
                       </div>
                       <div className="flex items-center">
-                        <div className="bg-green-100 h-4 rounded" style={{width: `${(stats?.patientsByTrimester?.second / stats?.patientCount * 100) || 45}%`}} />
-                        <span className="ml-2 text-sm">Second: {stats?.patientsByTrimester?.second || 7}</span>
+                        <div className="bg-green-100 h-4 rounded" style={{width: `${((stats as any)?.patientsByTrimester?.second / (stats as any)?.patientCount * 100) || 45}%`}} />
+                        <span className="ml-2 text-sm">Second: {(stats as any)?.patientsByTrimester?.second || 7}</span>
                       </div>
                       <div className="flex items-center">
-                        <div className="bg-purple-100 h-4 rounded" style={{width: `${(stats?.patientsByTrimester?.third / stats?.patientCount * 100) || 25}%`}} />
-                        <span className="ml-2 text-sm">Third: {stats?.patientsByTrimester?.third || 4}</span>
+                        <div className="bg-purple-100 h-4 rounded" style={{width: `${((stats as any)?.patientsByTrimester?.third / (stats as any)?.patientCount * 100) || 25}%`}} />
+                        <span className="ml-2 text-sm">Third: {(stats as any)?.patientsByTrimester?.third || 4}</span>
                       </div>
                     </div>
                   </CardContent>
