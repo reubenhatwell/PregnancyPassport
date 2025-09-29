@@ -1104,6 +1104,10 @@ import { DatabaseStorage } from './database-storage';
 // Use DatabaseStorage if DATABASE_URL is set, otherwise fallback to MemStorage
 import { DatabaseStorage } from "./database-storage";
 
-export const storage = process.env.DATABASE_URL 
-  ? new DatabaseStorage() 
-  : new MemStorage();
+// Temporarily use MemStorage until DatabaseStorage implements all IStorage methods
+export const storage = new MemStorage();
+
+// TODO: Restore DatabaseStorage when patient visit and immunisation history methods are implemented
+// export const storage = process.env.DATABASE_URL 
+//   ? new DatabaseStorage() 
+//   : new MemStorage();

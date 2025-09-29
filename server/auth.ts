@@ -5,14 +5,14 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User, insertUserSchema, InsertSecurityLog } from "@shared/schema";
+import { User as UserType, insertUserSchema, InsertSecurityLog } from "@shared/schema";
 import { z } from "zod";
 import { createFirebaseUser, findFirebaseUserByEmail, updateFirebaseUser } from "./firebase-service";
 import { SecurityLogger } from "./security-logger";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User extends UserType {}
   }
 }
 

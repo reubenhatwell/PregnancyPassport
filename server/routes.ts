@@ -13,7 +13,8 @@ import {
   insertMessageSchema,
   insertPatientVisitSchema,
   insertImmunisationHistorySchema,
-  users
+  users,
+  type User
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
