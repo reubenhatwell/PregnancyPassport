@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { 
   Tabs, 
   TabsList, 
@@ -43,6 +44,7 @@ import DocumentationTemplates from "@/components/clinician/documentation-templat
 
 export default function ClinicianDashboard(props: { params?: { patientId?: string } }) {
   const [selectedTab, setSelectedTab] = useState("dashboard");
+  const [, setLocation] = useLocation();
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
     props.params?.patientId ? parseInt(props.params.patientId) : null
   );
@@ -61,8 +63,8 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
   });
   
   // Get selected patient data
-  const { data: selectedPatient } = useQuery<User>({
-    queryKey: ["/api/patients", selectedPatientId],
+  const { data: selectedPatient, isLoading: isLoadingPatient, error: patientError } = useQuery<User>({
+    queryKey: [`/api/patients/${selectedPatientId}`],
     enabled: !!selectedPatientId,
   });
   
@@ -91,7 +93,45 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
   const handleCloseAddPatientDialog = () => {
     setShowAddPatientDialog(false);
   };
+
+  // Handle closing patient detail dialog and navigate back to dashboard
+  const handleClosePatientDetail = (open: boolean) => {
+    setShowPatientDetail(open);
+    if (!open) {
+      setSelectedPatientId(null);
+      // If we came from a direct URL, navigate back to the main dashboard
+      if (props.params?.patientId) {
+        setLocation('/patient-directory');
+      }
+    }
+  };
   
+  // Show loading state when accessing patient directly via URL
+  if (props.params?.patientId && isLoadingPatient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading patient information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state when patient fails to load
+  if (props.params?.patientId && patientError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Failed to load patient information</p>
+          <Button onClick={() => setLocation('/patient-directory')}>
+            Return to Patient Directory
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -365,7 +405,7 @@ export default function ClinicianDashboard(props: { params?: { patientId?: strin
       
       {/* Patient Detail Dialog */}
       {selectedPatient && (
-        <Dialog open={showPatientDetail} onOpenChange={setShowPatientDetail}>
+        <Dialog open={showPatientDetail} onOpenChange={handleClosePatientDetail}>
           <DialogContent className="max-w-4xl h-[80vh]">
             <DialogHeader>
               <DialogTitle>Patient: {selectedPatient.firstName} {selectedPatient.lastName}</DialogTitle>
