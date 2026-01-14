@@ -40,13 +40,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 
 // Define user roles
 type UserRole = "patient" | "clinician";
 
 // Login schema
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Valid email is required"),
   password: z.string().min(1, "Password is required"),
   role: z.enum(["patient", "clinician"] as const),
   rememberMe: z.boolean().default(false)
@@ -103,7 +104,7 @@ export default function AuthPage() {
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       role: "patient" as UserRole,
       rememberMe: false,
@@ -126,7 +127,12 @@ export default function AuthPage() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      const response = await apiRequest("POST", "/api/login", data);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (error) throw error;
+      const response = await apiRequest("GET", "/api/user");
       return await response.json();
     },
     onSuccess: (data) => {
@@ -149,7 +155,7 @@ export default function AuthPage() {
     onError: (error: any) => {
       toast({
         title: "Login failed",
-        description: error.message || "Invalid username or password",
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
     }
@@ -158,7 +164,20 @@ export default function AuthPage() {
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
-      const response = await apiRequest("POST", "/api/register", data);
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            username: data.username,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            role: data.role,
+          },
+        },
+      });
+      if (error) throw error;
+      const response = await apiRequest("GET", "/api/user");
       return await response.json();
     },
     onSuccess: (data) => {
@@ -210,8 +229,10 @@ export default function AuthPage() {
 
     try {
       setIsResettingPassword(true);
-      // Send password reset email
-      await apiRequest("POST", "/api/reset-password", { email: resetEmail });
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin + "/auth-page",
+      });
+      if (error) throw error;
       
       setResetEmailSent(true);
       toast({
@@ -250,12 +271,8 @@ export default function AuthPage() {
 
     try {
       setIsResettingPassword(true);
-      // Reset password
-      await apiRequest("POST", "/api/confirm-reset-password", { 
-        email: resetEmail,
-        newPassword,
-        resetCode
-      });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
       
       setShowPasswordResetConfirmDialog(false);
       setNewPassword("");
@@ -305,12 +322,12 @@ export default function AuthPage() {
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <FormField
                     control={loginForm.control}
-                    name="username"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your username" {...field} />
+                          <Input type="email" placeholder="Enter your email" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

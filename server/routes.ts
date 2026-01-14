@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage, MemStorage } from "./storage";
 import { setupAuth } from "./auth";
+import { authenticateSupabase } from "./supabase-auth";
 import { registerClinicianRoutes } from "./clinician-routes";
 import { z } from "zod";
 import {
@@ -18,7 +19,8 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up authentication routes (/api/register, /api/login, /api/logout, /api/user)
+  // Supabase-backed auth; protect API routes
+  app.use("/api", authenticateSupabase);
   setupAuth(app);
   
   // Register clinician-specific routes
@@ -104,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Pregnancy routes
   app.get("/api/pregnancy", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const user = req.user;
@@ -129,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/pregnancy", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     if (req.user.role !== "clinician") return res.status(403).send("Only clinicians can create pregnancy records");
     
     try {
@@ -147,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Appointment routes
   app.get("/api/appointments", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -171,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/appointments", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const validatedData = insertAppointmentSchema.parse(req.body);
@@ -196,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/appointments/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const id = parseInt(req.params.id);
@@ -222,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/appointments/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const id = parseInt(req.params.id);
@@ -253,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Vital Stats routes
   app.get("/api/vital-stats", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -277,7 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/vital-stats", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const validatedData = insertVitalStatSchema.parse(req.body);
@@ -306,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test Results routes
   app.get("/api/test-results", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -330,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/test-results", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     if (req.user.role !== "clinician") return res.status(403).send("Only clinicians can create test results");
     
     try {
@@ -350,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Scan routes
   app.get("/api/scans", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -374,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/scans", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const validatedData = insertScanSchema.parse(req.body);
@@ -403,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Message routes
   app.get("/api/messages", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -436,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/messages", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const validatedData = insertMessageSchema.parse(req.body);
@@ -462,7 +464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/messages/:id/read", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const id = parseInt(req.params.id);
@@ -490,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Education Module routes
   app.get("/api/education-modules", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const week = req.query.week ? parseInt(req.query.week as string) : null;
@@ -511,7 +513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Patient Visit routes
   app.get("/api/patient-visits", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       let pregnancyId: number;
@@ -535,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/patient-visits", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const validatedData = insertPatientVisitSchema.parse(req.body);
@@ -560,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/patient-visits/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const visitId = parseInt(req.params.id);
@@ -592,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/patient-visits/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const visitId = parseInt(req.params.id);
@@ -621,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Immunisation History routes
   app.get("/api/immunisation-history/pregnancy/:pregnancyId", async (req: any, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       const pregnancyId = parseInt(req.params.pregnancyId);
@@ -644,7 +646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/immunisation-history", async (req: any, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       // Only clinicians can create immunisation history
@@ -662,7 +664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/immunisation-history/:id", async (req: any, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
     
     try {
       // Only clinicians can update immunisation history

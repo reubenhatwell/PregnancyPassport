@@ -72,11 +72,7 @@ export default function ImmunisationHistory() {
   // Mutation for creating immunisation history
   const createMutation = useMutation({
     mutationFn: (data: Partial<ImmunisationData>) =>
-      apiRequest("/api/immunisation-history", {
-        method: "POST",
-        body: JSON.stringify({ ...data, pregnancyId: pregnancy?.id }),
-        headers: { "Content-Type": "application/json" },
-      }),
+      apiRequest("POST", "/api/immunisation-history", { ...data, pregnancyId: pregnancy?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/immunisation-history", pregnancy?.id] });
       toast({
@@ -96,11 +92,7 @@ export default function ImmunisationHistory() {
   // Mutation for updating immunisation history
   const updateMutation = useMutation({
     mutationFn: (data: Partial<ImmunisationData>) =>
-      apiRequest(`/api/immunisation-history/${immunisationData?.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      }),
+      apiRequest("PATCH", `/api/immunisation-history/${immunisationData?.id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/immunisation-history", pregnancy?.id] });
       toast({

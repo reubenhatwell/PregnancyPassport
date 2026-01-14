@@ -37,7 +37,7 @@ interface ClinicalNote {
 export function registerClinicianRoutes(app: Express, storage: IStorage) {
   // Middleware to check if user is a clinician
   const isClinicianMiddleware = (req: Request, res: Response, next: Function) => {
-    if (!req.isAuthenticated()) return res.status(401).send("Unauthorized");
+    if (!req.user) return res.status(401).send("Unauthorized");
     if (req.user.role !== "clinician") return res.status(403).send("Forbidden: Clinician access only");
     next();
   };

@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,54 +47,19 @@ export default function AddPatientForm({ onSuccess }: AddPatientFormProps) {
   // Mutation for creating a new patient
   const createPatientMutation = useMutation({
     mutationFn: async (data: AddPatientFormValues) => {
-      // First create a user account for the patient
-      const userRes = await apiRequest("POST", "/api/register", {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        username: `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}`,
-        password: "tempPassword123", // This would typically be randomly generated
-        role: "patient",
-      });
-      
-      const user = await userRes.json();
-      
-      // Then create a pregnancy record for the new patient
-      const pregnancyRes = await apiRequest("POST", "/api/pregnancy", {
-        patientId: user.id,
-        dueDate: data.dueDate,
-        startDate: data.startDate,
-        medicalRecordNumber: data.medicalRecordNumber,
-        contactNumber: data.contactNumber,
-        pregnancyType: data.pregnancyType,
-      });
-      
-      return await pregnancyRes.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/patients"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pregnancies"] });
-      
-      toast({
-        title: "Success",
-        description: "New patient added successfully",
-      });
-      
-      form.reset();
-      
-      if (onSuccess) {
-        onSuccess();
-      }
+      throw new Error("Clinician-created patient accounts are disabled. Ask the patient to sign up directly.");
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add patient",
+        title: "Action needed",
+        description: error.message || "Have the patient create their account via the sign-up page.",
         variant: "destructive",
       });
     },
   });
 
+  // TODO: When enabling clinician-created accounts via Supabase admin API,
+  // implement user creation + pregnancy creation below.
   const onSubmit = (data: AddPatientFormValues) => {
     createPatientMutation.mutate(data);
   };

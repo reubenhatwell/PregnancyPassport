@@ -1,4 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { supabase } from "./supabase";
+import { handleApiRequest } from "./apiAdapter";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -12,13 +14,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
+  // Route all app API calls through the Supabase adapter
+  const res = await handleApiRequest(method, url, data);
   await throwIfResNotOk(res);
   return res;
 }
@@ -29,9 +26,20 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    let url = queryKey[0] as string;
+    const param = queryKey.length > 1 ? queryKey[1] : undefined;
+    if (param !== undefined && param !== null) {
+      if (url.includes("vital-stats") || url.includes("test-results") || url.includes("scans")) {
+        url = `${url}?pregnancyId=${param}`;
+      } else if (url.includes("immunisation-history")) {
+        url = `${url}?pregnancyId=${param}`;
+      } else if (url.includes("messages")) {
+        url = `${url}?otherUserId=${param}`;
+      } else if (url.includes("pregnancies/patient")) {
+        url = `${url}?patientId=${param}`;
+      }
+    }
+    const res = await handleApiRequest("GET", url);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;

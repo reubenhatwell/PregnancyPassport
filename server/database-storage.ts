@@ -63,6 +63,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserBySupabaseUid(supabaseUid: string): Promise<User | undefined> {
+    if (!db) return undefined;
+    const [user] = await db.select().from(users).where(eq(users.supabaseUid, supabaseUid));
+    return user;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     if (!db) throw new Error("Database not available");
     const [user] = await db.insert(users).values(insertUser).returning();

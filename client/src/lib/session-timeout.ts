@@ -1,5 +1,3 @@
-import { apiRequest } from './queryClient';
-
 const SESSION_ACTIVITY_KEY = 'lastUserActivity';
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes by default
 
@@ -77,13 +75,6 @@ async function checkSessionTimeout(timeout: number) {
   if (timeSinceLastActivity > timeout) {
     // Session has timed out
     isSessionExpired = true;
-    
-    try {
-      // Try to log the session timeout to the server for audit purposes
-      await apiRequest('POST', '/api/session-timeout', {});
-    } catch (error) {
-      console.error('Failed to log session timeout:', error);
-    }
     
     // Display a timeout message to the user
     window.alert('Your session has expired due to inactivity. Please log in again.');

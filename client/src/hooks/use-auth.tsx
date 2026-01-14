@@ -8,6 +8,7 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, LoginData, RegisterData } from "@/types";
 import { initSessionTimeoutMonitor } from "../lib/session-timeout";
+import { supabase } from "@/lib/supabase";
 
 type AuthContextType = {
   user: User | null;
@@ -51,7 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      });
+      if (error) throw error;
+      // Trigger user fetch from API to sync/create local record
+      const res = await apiRequest("GET", "/api/user");
       return await res.json();
     },
     onSuccess: (user: User) => {
@@ -80,7 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      await supabase.auth.signOut();
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onSuccess: () => {
       // Clear user data and redirect to login page
@@ -103,7 +111,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (userData: RegisterData) => {
-      const res = await apiRequest("POST", "/api/register", userData);
+      const { error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            username: userData.username,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: userData.role,
+          },
+        },
+      });
+      if (error) throw error;
+      // After sign up, fetch user from API (auto-provisioned)
+      const res = await apiRequest("GET", "/api/user");
       return await res.json();
     },
     onSuccess: (user: User) => {
